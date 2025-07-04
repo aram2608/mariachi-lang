@@ -1,0 +1,14 @@
+[project]
+name = "mariachi-lang"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Javier Arambula Rascon", email = "ja1473@Javiers-MacBook-Pro.local" }
+]
+requires-python = ">=3.13"
+dependencies = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
