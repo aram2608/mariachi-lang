@@ -1,6 +1,7 @@
 """The lexer module for the Mariachi Lang."""
 
 from .token import *
+from .errors import *
 
 class Lexer:
     def __init__(self, text):
@@ -48,8 +49,12 @@ class Lexer:
             elif self.current_char == ')':
                 tokens.append(Token(TT_RPAREN))
                 self.advance()
+            else:
+                char = self.current_char
+                self.advance()
+                return [], InesperadoError(char)
 
-        return tokens
+        return tokens, None
     
     def make_number(self):
         """A class to handle tokenization of numbers."""

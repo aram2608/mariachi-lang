@@ -29,6 +29,7 @@ class Token:
     def __repr__(self):
         """Representation method for printing to terminal window."""
         # If the token has a value both the type and value are returned
-        if self.value: return f'{self.type}:{self.value}'
+        if self.value:
+            return f'{self.type}:{self.value}'
         # Otherwise just the type is returned
         return f'{self.type}'
