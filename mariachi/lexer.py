@@ -8,7 +8,7 @@ class Lexer:
         self.text = text
         # Tracks current position
         self.pos = -1
-        # Tracks current character
+        # Tracks current character, default is None type
         self.current_char = None
         self.advance()
 
@@ -53,17 +53,20 @@ class Lexer:
     
     def make_number(self):
         """A class to handle tokenization of numbers."""
+        # We handle all numbers as strings for tokenization.
         num_str = ''
         dot_count = 0
 
+        # The logic for handling integers vs floating point values.
         while self.current_char != None and self.current_char in DIGITS + '.':
             if self.current_char == '.':
-                if dot_count == 1: break
+                if dot_count == 1: 
+                    break
                 dot_count += 1
                 num_str += '.'
             else:
                 num_str += self.current_char
-
+        # Tokenization logic following evaluation of token type.
         if dot_count == 0:
             return Token(TT_INT, int(num_str))
         else:
