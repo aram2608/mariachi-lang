@@ -2,8 +2,8 @@
 
 from .lexer import *
 
-def run(code):
+def run(fn, code):
     """The code runner used to parse the code and tokenize inputs."""
-    lexer = Lexer(code)
+    lexer = Lexer(fn, code)
     tokens, error = lexer.make_tokens()
     return tokens, error

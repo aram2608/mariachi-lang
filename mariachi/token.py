@@ -21,7 +21,7 @@ TT_RPAREN = 'RPAREN'
 
 class Token:
     """The tokens represented in the Mariachi Lang."""
-    def __init__(self, type_, value):
+    def __init__(self, type_, value=None):
         """Initial parameters for tokens, each one has a type and value."""
         self.type = type_
         self.value = value

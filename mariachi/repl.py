@@ -12,7 +12,7 @@ def repl():
         elif not code:
             continue
         
-        result, error = run(code)
+        result, error = run('repl', code)
 
         if error:
             print(error.as_string())
