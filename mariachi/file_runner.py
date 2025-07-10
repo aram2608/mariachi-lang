@@ -1,6 +1,9 @@
 
 class Position:
     def __init__(self, idx, ln, col, fn, ftxt):
+        """Initial parameters for the position class.
+        Stores index, line, column, file name, and file text.
+        """
         self.idx = idx
         self.ln = ln
         self.col = col
@@ -19,4 +22,5 @@ class Position:
         return self
     
     def copy(self):
+        """Copies all of the stored values at a given position."""
         return Position(self.idx, self.ln, self.col, self.fn, self.ftxt)
