@@ -3,6 +3,7 @@
 from .lexer import *
 from .nodes import *
 from .token import *
+from .interpreter import *
 
 class Parser:
     """The parser class for our language."""
@@ -125,4 +126,10 @@ def run(fn, code):
     # Generates the AST
     parser = Parser(tokens)
     ast = parser.parse()
-    return ast.node, ast.error
+    if ast.error:
+        return None, ast.error
+    
+    # Run interpreter
+    interpreter = Interpreter()
+    interpreter.visit(ast.node)
+    return None, None
