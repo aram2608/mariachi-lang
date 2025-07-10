@@ -1,5 +1,3 @@
-"""The parser module for the Mariachi Lang toy language."""
-
 from .lexer import *
 from .nodes import *
 from .token import *
@@ -94,6 +92,7 @@ class Parser:
             res.register(self.advance())
             
             # Check to make sure following token is an indentifier
+            print(self.current_tok)
             if self.current_tok != TT_IDENTIFIER:
                 return res.failure(SintaxisInvalidoError(
                     self.current_tok.pos_start, self.current_tok.pos_end, 'Expected indentifier'))
@@ -112,6 +111,7 @@ class Parser:
             expr = res.register(self.expr())
             if res.error: return res
             return res.success(VarAssignNode(var_name, expr))
+
         return self.binary_operation(self.term, (TT_PLUS, TT_MINUS))
 
     def binary_operation(self, func_a, ops, func_b=None):
@@ -128,13 +128,18 @@ class Parser:
         while self.current_tok.type in ops:
             # We assign the operation tokens
             op_tok = self.current_tok
+
             # We have to advance to prevent infinite loops
+
             res.register(self.advance())
+
             # We assign the right factor
             right = res.register(func_b())
+
             # Early exit if an error is found
             if res.error:
                 return res
+
             # Reassign to a BindaryOpNode
             left = BinaryOpNode(left, op_tok, right)
         return res.success(left)

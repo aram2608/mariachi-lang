@@ -1,4 +1,3 @@
-"""Nodes for the Mariachi Lang toy languuage."""
 class NumberNode:
     def __init__(self, tok):
         self.tok = tok

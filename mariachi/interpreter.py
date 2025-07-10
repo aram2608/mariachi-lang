@@ -1,5 +1,3 @@
-"""The interpreter module for the Mariachi Lang toy language."""
-
 from .numbers import *
 from .token import *
 from .results import *

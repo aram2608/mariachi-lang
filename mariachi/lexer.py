@@ -1,5 +1,3 @@
-"""The lexer module for the Mariachi Lang."""
-
 from .token import *
 from .errors import *
 

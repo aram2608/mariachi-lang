@@ -1,5 +1,3 @@
-"""REPL for the Mariachi toy language."""
-
 from .parser import run
 
 RED = '\033[91m'

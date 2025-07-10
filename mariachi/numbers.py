@@ -1,5 +1,3 @@
-"""Module for arithmetic operations."""
-
 from .errors import *
 
 class Number:

@@ -1,5 +1,3 @@
-"""Mariachi Lang token module."""
-
 import string
 
 #################################
