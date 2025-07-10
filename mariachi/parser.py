@@ -32,10 +32,32 @@ class Parser:
         """Logic for handling factors."""
         res = ParseResult()
         tok = self.current_tok
+        # Checks to see if our token type is a plus or a minus
+        if tok.type in (TT_PLUS, TT_MINUS):
+            res.register(self.advance())
+            factor = res.register(self.factor())
+            # Check for any errors
+            if res.error:
+                return res
+            return res.success(UnaryOpNode(tok, factor))
         # Checks if our current token is a number type
-        if tok.type in (TT_INT, TT_FLOAT):
+        elif tok.type in (TT_INT, TT_FLOAT):
             res.register(self.advance())
             return res.success(NumberNode(tok))
+        elif tok.type == TT_LPAREN:
+            res.register(self.advance())
+            expr = res.register(self.expr())
+            # Check for errors
+            if res.error:
+                return res
+            if self.current_tok.type == TT_RPAREN:
+                res.register(self.advance())
+                return res.success(expr)
+            else:
+                return res.failure(
+                    SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "Expected ')'")
+                    )
+
         return res.failure(
             SintaxisInvalidoError(tok.pos_start, tok.pos_end, 'Expected int or float')
             )

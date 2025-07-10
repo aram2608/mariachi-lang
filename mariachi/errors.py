@@ -25,7 +25,7 @@ class SintaxisInvalidoError(Error):
 
 def string_with_arrows(code, pos_start, pos_end):
     """Adds arrows to point to where the error occured."""
-    RED = '\033[91m'
+    YELLOW = "\033[93m"
     BOLD = '\033[1m'
     RESET = '\033[0m'
     # Holds our final result
@@ -47,7 +47,7 @@ def string_with_arrows(code, pos_start, pos_end):
         # Append to result
         num_arrows = max(1, col_end - col_start)
         result += f"{BOLD}{line}{RESET}\n"
-        result += ' ' * col_start + f"{RED}{'^' * num_arrows}{RESET}"
+        result += ' ' * col_start + f"{YELLOW}{'^' * num_arrows}{RESET}"
 
         # Recalculate indices
         idx_start = idx_end
