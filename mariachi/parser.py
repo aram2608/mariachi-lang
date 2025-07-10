@@ -159,7 +159,7 @@ class Parser:
         return res.success(left)
 
 global_symbole_table = SymbolTable()
-global_symbole_table.set("null", Number(0))
+global_symbole_table.set("nada", Number(0))
 
 def run(fn, code):
     """The code runner used to parse the code and tokenize inputs."""

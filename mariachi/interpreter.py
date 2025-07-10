@@ -74,6 +74,7 @@ class Interpreter:
         if not value:
             return res.failure(EjecucionError(
                 node.pos_start, node.pos_end, f"'{var_name}' no es definido", context))
+        value = value.copy().set_position(node.pos_start, node.pos_end)
         return res.success(value)
     
 class SymbolTable:

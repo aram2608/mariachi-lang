@@ -3,22 +3,28 @@ class ParseResult:
     def __init__(self):
         self.error = None
         self.node = None
+        self.advance_count = 0
+
+    def register_advancement(self):
+        """A function to keep track of advancements."""
+        self.advance_count += 1
 
     def register(self, res):
-        """A function to pass parse results.."""
+        """A function to pass parse results."""
+        self.advance_count += res.advance_count
         if res.error:
             self.error = res.error
         return res.node
-    
-    def register_advancement(self):
-        pass
 
     def success(self, node):
+        """A function to declare succesful parsing."""
         self.node = node
         return self
 
     def failure(self, error):
-        self.error = error
+        """A function to declare unsuccessful parsing."""
+        if not self.error or self.advance_count == 0:
+            self.error = error
         return self
     
 class RTResult:
@@ -28,14 +34,17 @@ class RTResult:
         self.error = None
 
     def register(self, res):
+        """A function to pass Runtime Results."""
         if res.error:
             self.error = res.error
         return res.value
 
     def success(self, value):
+        """A function to return succesful runtime results."""
         self.value = value
         return self
 
     def failure(self, error):
+        """A function to return unsuccesful runtime results."""
         self.error = error
         return self

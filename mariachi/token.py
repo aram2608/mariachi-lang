@@ -9,8 +9,25 @@ LETTERS = string.ascii_letters
 LETTERS_DIGITS = LETTERS + DIGITS
 
 KEYWORDS = [
-    'sea' # let keyword, means "let it be"
-    ]
+    'sea',       # let
+    'fija',      # const
+    'o',         # or
+    'si',        # if
+    'si no',     # elseif
+    'sino',      # else
+    'cierto',    # true
+    'falso',     # false
+    'jamas',     # not
+    'y',         # and
+    'entrega',   # return
+    'define',    # define
+    'para',      # for
+    'canta',     # print
+    'invoca',    # class creation
+    'mientras',  # while
+    'rompe',     # break
+]
+
 
 #################################
 # TOKENS

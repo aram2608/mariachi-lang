@@ -14,18 +14,22 @@ class Number:
         return self
     
     def added_to(self, other):
+        """A function to represent addition."""
         if isinstance(other, Number):
             return Number(self.value + other.value).set_context(self.context), None
         
     def subbed_by(self, other):
+        """A function to represent subtraction."""
         if isinstance(other, Number):
             return Number(self.value - other.value).set_context(self.context), None
         
     def multed_by(self, other):
+        """A function to represent multiplication."""
         if isinstance(other, Number):
             return Number(self.value * other.value).set_context(self.context), None
         
     def divided_by(self, other):
+        """A function to represent division."""
         if isinstance(other, Number):
             if other.value == 0:
                 return None, EjecucionError(
@@ -35,10 +39,12 @@ class Number:
             return Number(self.value / other.value).set_context(self.context), None
         
     def power_by(self, other):
+        """A function to represent power multiplication."""
         if isinstance(other, Number):
             return Number(self.value ** other.value).set_context(self.set_context), None
         
     def modulo_by(self, other):
+        """A function to represent modulo operations."""
         if isinstance(other, Number):
             if other.value == 0:
                 return None, EjecucionError(
@@ -46,6 +52,13 @@ class Number:
                     self.context
                 )
             return Number(self.value % other.value).set_context(self.context), None
+        
+    def copy(self):
+        """A function to copy an operations position."""
+        copy = Number(self.value)
+        copy.set_position(self.pos_start, self.pos_end)
+        copy.set_context(self.context)
+        return copy
         
     def set_context(self, context=None):
         self.context = context
