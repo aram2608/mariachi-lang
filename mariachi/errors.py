@@ -23,6 +23,10 @@ class SintaxisInvalidoError(Error):
     def __init__(self, pos_start, pos_end, details=''):
         super().__init__(pos_start, pos_end, 'Syntax Invalido', details)
 
+class EjecucionError(Error):
+    def __init__(self, pos_start, pos_end, details=''):
+        super().__init__(pos_start, pos_end, 'Ejecucion error', details)
+
 def string_with_arrows(code, pos_start, pos_end):
     """Adds arrows to point to where the error occured."""
     YELLOW = "\033[93m"

@@ -92,28 +92,6 @@ class Parser:
             # Reassign to a BindaryOpNode
             left = BinaryOpNode(left, op_tok, right)
         return res.success(left)
-    
-class ParseResult:
-    """A class for handling the results from parsing."""
-    def __init__(self):
-        self.error = None
-        self.node = None
-
-    def register(self, res):
-        """Checks for errors."""
-        if isinstance(res, ParseResult):
-            if res.error:
-                self.error = res.error
-            return res.node
-        return res
-
-    def success(self, node):
-        self.node = node
-        return self
-
-    def failure(self, error):
-        self.error = error
-        return self
 
 def run(fn, code):
     """The code runner used to parse the code and tokenize inputs."""
@@ -131,5 +109,5 @@ def run(fn, code):
     
     # Run interpreter
     interpreter = Interpreter()
-    interpreter.visit(ast.node)
-    return None, None
+    result = interpreter.visit(ast.node)
+    return result.value, result.error

@@ -1,5 +1,9 @@
 """The interpreter module for the Mariachi Lang toy language."""
 
+from .numbers import *
+from .token import *
+from .results import *
+
 class Interpreter:
     """The interpreter for the Mariachi Lang toy language."""
     def visit(self, node):
@@ -13,13 +17,38 @@ class Interpreter:
         raise Exception(f'No visit_{type(node).__name__} method defined.')
     
     def visit_NumberNode(self, node):
-        print("Found num node")
+        return RTResult().success(Number(node.tok.value).set_position(node.pos_start, node.pos_end))
 
     def visit_BinaryOpNode(self, node):
-        print('Found bin op node')
-        self.visit(node.left_node)
-        self.visit(node.right_node)
+        res = RTResult()
+        left = res.register(self.visit(node.left_node))
+        if res.error:
+            return res
+        right = res.register(self.visit(node.right_node))
+        if res.error:
+            return res
+
+        if node.op_tok.type == TT_PLUS:
+            result, error = left.added_to(right)
+        if node.op_tok.type == TT_MINUS:
+            result, error = left.subbed_by(right)
+        if node.op_tok.type == TT_MUL:
+            result, error = left.multed_by(right)
+        if node.op_tok.type == TT_DIV:
+            result, error = left.divided_by(right)
+
+        if error:
+            return res.failure(error)
+        return res.success(result.set_position(node.pos_start, node.pos_end))
 
     def visit_UnaryOpNode(self, node):
-        print("Found unary op node.")
-        self.visit(node.node)
+        res = RTResult()
+        number = res.register(self.visit(node.node))
+        if res.error:
+            return res
+        if node.op_tok.type == TT_MINUS:
+            number, error = number.multed_by(Number(-1))
+
+        if error:
+            return res.failure(error)
+        return res.success(number.set_position(node.pos_start, node.pos_end))
