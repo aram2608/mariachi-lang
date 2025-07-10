@@ -1,7 +1,7 @@
 expr    : KEYWORD:sea IDENTIFIER EQ expr \\ lowest priority
         : term ((PLUS|MINUS) term)* 
 
-term    : factor ((MUL|DIV) factor)*
+term    : factor ((MUL|DIV|MOD) factor)*
 
 factor  : (PLUS|MINUS) factor
         : power

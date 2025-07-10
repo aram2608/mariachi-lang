@@ -5,12 +5,13 @@ class ParseResult:
         self.node = None
 
     def register(self, res):
-        """Checks for errors."""
-        if isinstance(res, ParseResult):
-            if res.error:
-                self.error = res.error
-            return res.node
-        return res
+        """A function to pass parse results.."""
+        if res.error:
+            self.error = res.error
+        return res.node
+    
+    def register_advancement(self):
+        pass
 
     def success(self, node):
         self.node = node

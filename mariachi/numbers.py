@@ -38,6 +38,15 @@ class Number:
         if isinstance(other, Number):
             return Number(self.value ** other.value).set_context(self.set_context), None
         
+    def modulo_by(self, other):
+        if isinstance(other, Number):
+            if other.value == 0:
+                return None, EjecucionError(
+                    other.pos_start, other.pos_end, 'Division por zero',
+                    self.context
+                )
+            return Number(self.value % other.value).set_context(self.context), None
+        
     def set_context(self, context=None):
         self.context = context
         return self

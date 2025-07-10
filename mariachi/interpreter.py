@@ -38,6 +38,8 @@ class Interpreter:
             result, error = left.divided_by(right)
         elif node.op_tok.type == TT_POW:
             result, error = left.power_by(right)
+        elif node.op_tok.type == TT_MOD:
+            result, error = left.modulo_by(right)
 
         if error:
             return res.failure(error)
@@ -71,7 +73,7 @@ class Interpreter:
 
         if not value:
             return res.failure(EjecucionError(
-                node.pos_start, node.pos_end, f"'{var_name}' is not defined", context))
+                node.pos_start, node.pos_end, f"'{var_name}' no es definido", context))
         return res.success(value)
     
 class SymbolTable:

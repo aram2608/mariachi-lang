@@ -24,7 +24,7 @@ class Parser:
         res = self.expr()
         if not res.error and self.current_tok.type != TT_EOF:
             return res.failure(
-                SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "Expected '+', '/', '+', 'or' -")
+                SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "'+', '/', '+', o '-' esperado")
                 )
         return res
     
@@ -35,30 +35,34 @@ class Parser:
 
         # Checks if our current token is a number type
         if tok.type in (TT_INT, TT_FLOAT):
-            res.register(self.advance())
+            res.register_advancement()
+            self.advance()
             return res.success(NumberNode(tok))
         
         # Check for identifier
         elif tok.type == TT_IDENTIFIER:
-            res.register(self.advance())
+            res.register_advancement()
+            self.advance()
             return res.success(VarAccessNode(tok))
 
         # Parenthesis check
         elif tok.type == TT_LPAREN:
-            res.register(self.advance())
+            res.register_advancement()
+            self.advance()
             expr = res.register(self.expr())
             # Check for errors
             if res.error:
                 return res
             if self.current_tok.type == TT_RPAREN:
-                res.register(self.advance())
+                res.register_advancement()
+                self.advance()
                 return res.success(expr)
             else:
                 return res.failure(
-                    SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "Expected ')'")
+                    SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "')' esperado")
                     )
         return res.failure(
-            SintaxisInvalidoError(tok.pos_start, tok.pos_end, "Expected int, float, '+', '-', or '(')")
+            SintaxisInvalidoError(tok.pos_start, tok.pos_end, "int, float, identificador, '+', '-', o '(') esperado")
             )
     
     def power(self):
@@ -71,7 +75,8 @@ class Parser:
         tok = self.current_tok
         # Checks to see if our token type is a plus or a minus
         if tok.type in (TT_PLUS, TT_MINUS):
-            res.register(self.advance())
+            res.register_advancement()
+            self.advance()
             factor = res.register(self.factor())
             # Check for any errors
             if res.error:
@@ -81,7 +86,7 @@ class Parser:
 
     def term(self):
         """Creates our terms."""
-        return self.binary_operation(self.factor, (TT_DIV, TT_MUL))
+        return self.binary_operation(self.factor, (TT_DIV, TT_MUL, TT_MOD))
 
     def expr(self):
         """Creates our expression."""
@@ -89,30 +94,38 @@ class Parser:
 
         # Check to make sure the token matches a keyword
         if self.current_tok.matches(TT_KEYWORD, 'sea'):
-            res.register(self.advance())
+            res.register_advancement()
+            self.advance()
             
             # Check to make sure following token is an indentifier
-            print(self.current_tok)
-            if self.current_tok != TT_IDENTIFIER:
+            if self.current_tok.type != TT_IDENTIFIER:
                 return res.failure(SintaxisInvalidoError(
-                    self.current_tok.pos_start, self.current_tok.pos_end, 'Expected indentifier'))
+                    self.current_tok.pos_start, self.current_tok.pos_end, 'Identificador esperado'))
             
             # Assigns the variable name
             var_name = self.current_tok
-            res.register(self.advance())
+            res.register_advancement()
+            self.advance()
 
             # Check to ensure that following a var name is an =
             if self.current_tok.type != TT_EQ:
                 return res.failure(SintaxisInvalidoError(
-                    self.current_tok.pos_start, self.current_tok.pos_end, "Expected '='"))
+                    self.current_tok.pos_start, self.current_tok.pos_end, "'=' esperado"))
             
             # Assign a new expression to the created variable
-            res.register(self.advance())
+            res.register_advancement()
+            self.advance()
             expr = res.register(self.expr())
             if res.error: return res
             return res.success(VarAssignNode(var_name, expr))
 
-        return self.binary_operation(self.term, (TT_PLUS, TT_MINUS))
+        node = res.register(self.binary_operation(self.term, (TT_PLUS, TT_MINUS)))
+
+        if res.error: 
+            return res.failure(
+                SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, 
+                                    "'sea', int, float, identificador, '+', '-', o '(') esperado"))
+        return res.success(node)
 
     def binary_operation(self, func_a, ops, func_b=None):
         """Refactored logic for handling operators."""
@@ -131,7 +144,8 @@ class Parser:
 
             # We have to advance to prevent infinite loops
 
-            res.register(self.advance())
+            res.register_advancement()
+            self.advance()
 
             # We assign the right factor
             right = res.register(func_b())

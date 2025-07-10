@@ -11,10 +11,10 @@ PROMPT   = f"{RED}mariachi {GREEN}> {RESET}"
 
 def repl():
     print(f"{TITLE}Saludos desde el Mariachi REPL!{RESET}")
-    print(f"{SUBTITLE}Type 'salir()' to quit.{RESET}\n")
+    print(f"{SUBTITLE}Type 'salir' to quit.{RESET}\n")
     while True:
         code = input(PROMPT)
-        if code == "salir()":
+        if code == "salir" or code == "salir()":
             break
         elif not code:
             continue

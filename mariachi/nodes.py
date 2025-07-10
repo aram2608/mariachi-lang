@@ -9,6 +9,7 @@ class NumberNode:
         return f'{self.tok}'
     
 class BinaryOpNode:
+    """Node class for binary operations."""
     def __init__(self, left_node, op_tok, right_node):
         self.left_node = left_node
         self.op_tok = op_tok
@@ -20,6 +21,7 @@ class BinaryOpNode:
         return f'({self.left_node}, {self.op_tok}, {self.right_node})'
     
 class UnaryOpNode:
+    """Node class for unary operations."""
     def __init__(self, op_tok, node):
         self.op_tok = op_tok
         self.node = node
