@@ -30,20 +30,12 @@ class Parser:
                 )
         return res
     
-    def factor(self):
-        """Logic for handling factors."""
+    def atom(self):
+        """Logic for handling atoms."""
         res = ParseResult()
         tok = self.current_tok
-        # Checks to see if our token type is a plus or a minus
-        if tok.type in (TT_PLUS, TT_MINUS):
-            res.register(self.advance())
-            factor = res.register(self.factor())
-            # Check for any errors
-            if res.error:
-                return res
-            return res.success(UnaryOpNode(tok, factor))
         # Checks if our current token is a number type
-        elif tok.type in (TT_INT, TT_FLOAT):
+        if tok.type in (TT_INT, TT_FLOAT):
             res.register(self.advance())
             return res.success(NumberNode(tok))
         elif tok.type == TT_LPAREN:
@@ -59,11 +51,28 @@ class Parser:
                 return res.failure(
                     SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "Expected ')'")
                     )
-
         return res.failure(
-            SintaxisInvalidoError(tok.pos_start, tok.pos_end, 'Expected int or float')
+            SintaxisInvalidoError(tok.pos_start, tok.pos_end, "Expected int, float, '+', '-', or '(')")
             )
-        
+    
+    def power(self):
+        """Handles powers."""
+        return self.binary_operation(self.atom,(TT_POW, ), self.factor)
+
+    def factor(self):
+        """Logic for handling factors."""
+        res = ParseResult()
+        tok = self.current_tok
+        # Checks to see if our token type is a plus or a minus
+        if tok.type in (TT_PLUS, TT_MINUS):
+            res.register(self.advance())
+            factor = res.register(self.factor())
+            # Check for any errors
+            if res.error:
+                return res
+            return res.success(UnaryOpNode(tok, factor))
+        return self.power()
+
     def term(self):
         """Creates our terms."""
         return self.binary_operation(self.factor, (TT_DIV, TT_MUL))
@@ -72,10 +81,13 @@ class Parser:
         """Creates our expression."""
         return self.binary_operation(self.term, (TT_PLUS, TT_MINUS))
 
-    def binary_operation(self, func, ops):
+    def binary_operation(self, func_a, ops, func_b=None):
         """Refactored logic for handling operators."""
+        if func_b == None:
+            func_b = func_a
+
         res = ParseResult()
-        left = res.register(func())
+        left = res.register(func_a())
         # Early exit if an error is found
         if res.error:
             return res
@@ -86,7 +98,7 @@ class Parser:
             # We have to advance to prevent infinite loops
             res.register(self.advance())
             # We assign the right factor
-            right = res.register(func())
+            right = res.register(func_b())
             # Early exit if an error is found
             if res.error:
                 return res

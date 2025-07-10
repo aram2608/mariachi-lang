@@ -1,5 +1,11 @@
 expr    : term ((PLUS|MINUS) term)* \\ lowest priority
+
 term    : factor ((MUL|DIV) factor)*
-factor  : INT|FLOAT \\ highest priority
-        : (PLUS|MINUS) factor
-        : LPAREN expr RPARN
+
+factor  : (PLUS|MINUS) factor
+        : power
+
+power   : atom (POW factor)*
+
+atom    : INT|FLOAT \\ highest priority
+        : LPAREN expr RPAREN

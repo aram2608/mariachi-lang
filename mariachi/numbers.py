@@ -36,6 +36,10 @@ class Number:
                 )
             return Number(self.value / other.value).set_context(self.context), None
         
+    def power_by(self, other):
+        if isinstance(other, Number):
+            return Number(self.value ** other.value).set_context(self.set_context), None
+        
     def set_context(self, context=None):
         self.context = context
         return self

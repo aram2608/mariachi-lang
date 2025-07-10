@@ -1,6 +1,7 @@
 """Custom error module for the Mariachi Lang."""
 
 class Error:
+    """The custom error classes of the Mariachi Lang."""
     def __init__(self, pos_start, pos_end, error_name, details):
         self.pos_start = pos_start
         self.pos_end = pos_end
