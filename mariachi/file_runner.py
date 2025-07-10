@@ -10,7 +10,7 @@ class Position:
         self.fn = fn
         self.ftxt = ftxt
 
-    def advance_position(self, current_char):
+    def advance(self, current_char=None):
         """A function to advance through a file, line by line."""
         self.idx += 1
         self.col += 1

@@ -11,9 +11,46 @@ class Error:
         """Converts our error type into a string with provided details."""
         result = f'{self.error_name}: {self.details}'
         result += f'\nFile {self.pos_start.fn}, line {self.pos_end.ln} + 1'
+        result += '\n' + string_with_arrows(self.pos_start.ftxt, self.pos_start, self.pos_end)
         return result
     
 class InesperadoError(Error):
     def __init__(self, pos_start, pos_end, details):
         """Subclass for unexpected character inputs."""
         super().__init__(pos_start, pos_end, 'Caracter Inesperado', details)
+
+class SintaxisInvalidoError(Error):
+    def __init__(self, pos_start, pos_end, details=''):
+        super().__init__(pos_start, pos_end, 'Syntax Invalido', details)
+
+def string_with_arrows(code, pos_start, pos_end):
+    """Adds arrows to point to where the error occured."""
+    RED = '\033[91m'
+    BOLD = '\033[1m'
+    RESET = '\033[0m'
+    # Holds our final result
+    result = ''
+
+    # Calculates indices
+    idx_start = max(code.rfind('\n', 0, pos_start.idx), 0)
+    idx_end = code.find('\n', idx_start + 1)
+    if idx_end < 0:
+        idx_end = len(code)
+
+    # Generate each line
+    line_count = pos_end.ln - pos_start.ln + 1
+    for i in range(line_count):
+        line = code[idx_start:idx_end]
+        col_start = pos_start.col if i == 0 else 0
+        col_end = pos_end.col if i == line_count - 1 else len(line) - 1
+
+        # Append to result
+        num_arrows = max(1, col_end - col_start)
+        result += f"{BOLD}{line}{RESET}\n"
+        result += ' ' * col_start + f"{RED}{'^' * num_arrows}{RESET}"
+
+        # Recalculate indices
+        idx_start = idx_end
+        idx_end = code.find('\n', idx_start + 1)
+        if idx_end < 0: idx_end = len(code)
+    return result.replace('\t', '')

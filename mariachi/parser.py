@@ -5,12 +5,13 @@ from .nodes import *
 from .token import *
 
 class Parser:
+    """The parser class for our language."""
     def __init__(self, tokens):
         self.tokens = tokens
         self.tok_idx = -1
-        self.advance_tok()
+        self.advance()
 
-    def advance_tok(self):
+    def advance(self):
         """Advance through our tokens."""
         self.tok_idx += 1
         if self.tok_idx < len(self.tokens):
@@ -20,16 +21,24 @@ class Parser:
     
     def parse(self):
         """Parser function for the grammar rules."""
-        result = self.expr()
-        return result
+        res = self.expr()
+        if not res.error and self.current_tok.type != TT_EOF:
+            return res.failure(
+                SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "Expected '+', '/', '+', 'or' -")
+                )
+        return res
     
     def factor(self):
         """Logic for handling factors."""
+        res = ParseResult()
         tok = self.current_tok
         # Checks if our current token is a number type
         if tok.type in (TT_INT, TT_FLOAT):
-            self.advance_tok()
-            return NumberNode(tok)
+            res.register(self.advance())
+            return res.success(NumberNode(tok))
+        return res.failure(
+            SintaxisInvalidoError(tok.pos_start, tok.pos_end, 'Expected int or float')
+            )
         
     def term(self):
         """Creates our terms."""
@@ -40,19 +49,48 @@ class Parser:
         return self.binary_operation(self.term, (TT_PLUS, TT_MINUS))
 
     def binary_operation(self, func, ops):
-        """Refactored logic for handling operators"""
-        left = func()
+        """Refactored logic for handling operators."""
+        res = ParseResult()
+        left = res.register(func())
+        # Early exit if an error is found
+        if res.error:
+            return res
 
         while self.current_tok.type in ops:
             # We assign the operation tokens
             op_tok = self.current_tok
             # We have to advance to prevent infinite loops
-            self.advance_tok()
+            res.register(self.advance())
             # We assign the right factor
-            right = func()
+            right = res.register(func())
+            # Early exit if an error is found
+            if res.error:
+                return res
             # Reassign to a BindaryOpNode
             left = BinaryOpNode(left, op_tok, right)
-        return left
+        return res.success(left)
+    
+class ParseResult:
+    """A class for handling the results from parsing."""
+    def __init__(self):
+        self.error = None
+        self.node = None
+
+    def register(self, res):
+        """Checks for errors."""
+        if isinstance(res, ParseResult):
+            if res.error:
+                self.error = res.error
+            return res.node
+        return res
+
+    def success(self, node):
+        self.node = node
+        return self
+
+    def failure(self, error):
+        self.error = error
+        return self
 
 def run(fn, code):
     """The code runner used to parse the code and tokenize inputs."""
@@ -65,4 +103,4 @@ def run(fn, code):
     # Generates the AST
     parser = Parser(tokens)
     ast = parser.parse()
-    return ast, None
+    return ast.node, ast.error
