@@ -3,6 +3,8 @@
 from .numbers import *
 from .token import *
 from .results import *
+from .context import *
+from .errors import *
 
 class Interpreter:
     """The interpreter for the Mariachi Lang toy language."""
@@ -54,3 +56,42 @@ class Interpreter:
         if error:
             return res.failure(error)
         return res.success(number.set_position(node.pos_start, node.pos_end))
+    
+    def visit_VarAssignNode(self, node, context):
+        res = RTResult()
+        var_name = node.var_name_tok.value
+        value = res.register(self.visit(node.value_node, context))
+        if res.error: return res
+
+        context.symbol_table.set(var_name, value)
+        return res.success(value)
+
+    def visit_VarAccessNode(self, node, context):
+        res = RTResult()
+        var_name = node.var_name_tok.value
+        value = context.symbol_table.get(var_name)
+
+        if not value:
+            return res.failure(EjecucionError(
+                node.pos_start, node.pos_end, f"'{var_name}' is not defined", context))
+        return res.success(value)
+    
+class SymbolTable:
+    def __init__(self):
+        self.symbols = {}
+        self.parent = None
+
+    def get(self, name):
+        """Function to get the value of a variable name."""
+        value = self.symbols.get(name, None)
+        if value == None and self.parent:
+            return self.parent.get(name)
+        return value
+    
+    def set(self, name, value):
+        """Sets the key value pairs of the symbols dictionary."""
+        self.symbols[name] = value
+
+    def remove(self, name):
+        """Removes a variable from the sybmols."""
+        del self.symbols[name]

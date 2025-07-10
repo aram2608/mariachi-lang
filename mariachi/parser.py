@@ -34,10 +34,18 @@ class Parser:
         """Logic for handling atoms."""
         res = ParseResult()
         tok = self.current_tok
+
         # Checks if our current token is a number type
         if tok.type in (TT_INT, TT_FLOAT):
             res.register(self.advance())
             return res.success(NumberNode(tok))
+        
+        # Check for identifier
+        elif tok.type == TT_IDENTIFIER:
+            res.register(self.advance())
+            return res.success(VarAccessNode(tok))
+
+        # Parenthesis check
         elif tok.type == TT_LPAREN:
             res.register(self.advance())
             expr = res.register(self.expr())
@@ -79,6 +87,31 @@ class Parser:
 
     def expr(self):
         """Creates our expression."""
+        res = ParseResult()
+
+        # Check to make sure the token matches a keyword
+        if self.current_tok.matches(TT_KEYWORD, 'sea'):
+            res.register(self.advance())
+            
+            # Check to make sure following token is an indentifier
+            if self.current_tok != TT_IDENTIFIER:
+                return res.failure(SintaxisInvalidoError(
+                    self.current_tok.pos_start, self.current_tok.pos_end, 'Expected indentifier'))
+            
+            # Assigns the variable name
+            var_name = self.current_tok
+            res.register(self.advance())
+
+            # Check to ensure that following a var name is an =
+            if self.current_tok.type != TT_EQ:
+                return res.failure(SintaxisInvalidoError(
+                    self.current_tok.pos_start, self.current_tok.pos_end, "Expected '='"))
+            
+            # Assign a new expression to the created variable
+            res.register(self.advance())
+            expr = res.register(self.expr())
+            if res.error: return res
+            return res.success(VarAssignNode(var_name, expr))
         return self.binary_operation(self.term, (TT_PLUS, TT_MINUS))
 
     def binary_operation(self, func_a, ops, func_b=None):
@@ -106,6 +139,9 @@ class Parser:
             left = BinaryOpNode(left, op_tok, right)
         return res.success(left)
 
+global_symbole_table = SymbolTable()
+global_symbole_table.set("null", Number(0))
+
 def run(fn, code):
     """The code runner used to parse the code and tokenize inputs."""
     # Generates the tokens
@@ -123,5 +159,6 @@ def run(fn, code):
     # Run interpreter
     interpreter = Interpreter()
     context = Context('<programma>')
+    context.symbol_table = global_symbole_table
     result = interpreter.visit(ast.node, context)
     return result.value, result.error
