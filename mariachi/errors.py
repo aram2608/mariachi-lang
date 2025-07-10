@@ -21,11 +21,31 @@ class InesperadoError(Error):
 
 class SintaxisInvalidoError(Error):
     def __init__(self, pos_start, pos_end, details=''):
-        super().__init__(pos_start, pos_end, 'Syntax Invalido', details)
+        super().__init__(pos_start, pos_end, 'Sintaxis Invalido', details)
 
 class EjecucionError(Error):
-    def __init__(self, pos_start, pos_end, details=''):
+    def __init__(self, pos_start, pos_end, details, context):
         super().__init__(pos_start, pos_end, 'Ejecucion error', details)
+        self.context = context
+
+    def as_string(self):
+        """Custom method to represent errors as strings."""
+        result = self.genereate_traceback()
+        result += f'{self.error_name}: {self.details}'
+        result += '\n' + string_with_arrows(self.pos_start.ftxt, self.pos_start, self.pos_end)
+        return result
+
+    def genereate_traceback(self):
+        """Generates a traceback for error handling."""
+        result = ''
+        pos = self.pos_start
+        ctx = self.context
+
+        while ctx:
+            result = f' Fichero {pos.fn}, lina {str(pos.ln + 1)}, en {ctx.display_name}\n'
+            pos = ctx.parent_entry_pos
+            ctx = ctx.parent
+        return 'Retrazo (funcion mas reciente):\n' + result
 
 def string_with_arrows(code, pos_start, pos_end):
     """Adds arrows to point to where the error occured."""

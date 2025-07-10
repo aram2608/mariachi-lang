@@ -4,6 +4,7 @@ from .lexer import *
 from .nodes import *
 from .token import *
 from .interpreter import *
+from .context import *
 
 class Parser:
     """The parser class for our language."""
@@ -109,5 +110,6 @@ def run(fn, code):
     
     # Run interpreter
     interpreter = Interpreter()
-    result = interpreter.visit(ast.node)
+    context = Context('<programma>')
+    result = interpreter.visit(ast.node, context)
     return result.value, result.error
