@@ -85,27 +85,23 @@ class Lexer:
 
             # Logical operations
             elif self.current_char == '!':
-                tok, error = self.make_not_equals()
+                token, error = self.make_not_equals()
                 if error: return [], error
-                tokens.append(tok)
+                tokens.append(token)
             elif self.current_char == '=':
-                tok, error = self.make_equals()
-                if error: return [], error
-                tokens.append(tok)
+                tokens.append(self.make_equals())
             elif self.current_char == '<':
-                tok, error = self.make_less_than()
-                if error: return [], error
-                tokens.append(tok)
+                tokens.append(self.make_less_than())
             elif self.current_char == '>':
-                tok, error = self.make_greater_than()
-                if error: return [], error
-                tokens.append(tok)
+                tokens.append(self.make_greater_than())
             else:
                 pos_start = self.pos.copy()
                 char = self.current_char
                 self.advance()
                 # Returns no tokens and bad character error
                 return [], InesperadoError(pos_start, self.pos, char)
+
+        # End of file
         tokens.append(Token(TT_EOF, pos_start=self.pos))
         return tokens, None
     
@@ -151,7 +147,7 @@ class Lexer:
 
         if self.current_char == '=':
             self.advance()
-            return Token(TT_NE, pos_start, pos_end=self.pos), None
+            return Token(TT_NE, pos_start=pos_start, pos_end=self.pos), None
         
         self.advance()
         return None, CaracterEsperadoError(pos_start, self.pos, "'=' despues de '!'")
@@ -165,7 +161,7 @@ class Lexer:
         if self.current_char == '=':
             self.advance()
             tok_type = TT_EE
-        return Token(tok_type, pos_start=pos_start, pos_end=self.pos), None
+        return Token(tok_type, pos_start=pos_start, pos_end=self.pos)
 
     def make_less_than(self):
         """A function to handle equalities."""
@@ -176,7 +172,7 @@ class Lexer:
         if self.current_char == '=':
             self.advance()
             tok_type = TT_LTE
-        return Token(tok_type, pos_start=pos_start, pos_end=self.pos), None
+        return Token(tok_type, pos_start=pos_start, pos_end=self.pos)
         
     def make_greater_than(self):
         """A function to handle equalities."""
@@ -187,7 +183,7 @@ class Lexer:
         if self.current_char == '=':
             self.advance()
             tok_type = TT_GTE
-        return Token(tok_type, pos_start=pos_start, pos_end=self.pos), None
+        return Token(tok_type, pos_start=pos_start, pos_end=self.pos)
     
 class Position:
     """A class to store the position of the different code attributes."""

@@ -21,6 +21,8 @@ KEYWORDS = [
     'sino',      # else
     'mientras',  # while
     'para',      # for
+    'hasta',     # to
+    'paso',      # step
     
     'fija',      # const
     'entrega',   # return

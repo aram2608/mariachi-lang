@@ -15,7 +15,17 @@ power   : atom (POW factor)*
 
 atom    : INT | FLOAT | IDENTIFIER | KEYWORD:cierto | KEYWORD:falso | '(' expr ')'
         : LPAREN expr RPAREN
+        : if
+        : while
+        : stat
+
+stat    : KEYWORD:si expr LBRACE expr RBRACE
 
 if      : KEYWORD:si expr KEYWORD:entonces expr
         (KEYWORD:si no expr KEYWORD:entonces expr)*
         (KEYWORD:sino expr)?
+
+for     : KEYWORD:para IDENTIFIER EQ expr KEYWORD:hasta expr
+        (KEYWORD:paso expr)? KEYWORD:entonces expr
+
+while   : KEYWORD:mientras expr KEYWORD:entonces expr

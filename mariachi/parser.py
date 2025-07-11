@@ -77,6 +77,18 @@ class Parser:
             if_expr = res.register(self.if_expr())
             if res.error: return res
             return res.success(if_expr)
+        
+        # For statement
+        elif tok.matches(TT_KEYWORD, 'para'):
+            for_expr = res.register(self.for_expr())
+            if res.error: return res
+            return res.success(for_expr)
+        
+        # While expression
+        elif tok.matches(TT_KEYWORD, 'para'):
+            while_expr = res.register(self.while_expr())
+            if res.error: return res
+            return res.success(while_expr)
 
         return res.failure(
             SintaxisInvalidoError(tok.pos_start, tok.pos_end, "int, float, identificador, '+', '-', o '(') esperado")
@@ -128,7 +140,6 @@ class Parser:
         self.advance()
 
         return res.success(BlockNode(statements))
-
 
     def term(self):
         """Creates our terms."""
@@ -270,6 +281,88 @@ class Parser:
                 SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, 
                                     "'sea', int, float, identificador, '+', '-', '(', o 'jamas' esperado"))
         return res.success(node)
+    
+    def for_expr(self):
+        res = ParseResult()
+
+        if not self.current_tok.matches(TT_KEYWORD, 'para'):
+            return res.failure(
+                SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "'para' esperado"))
+        
+        res.register_advancement()
+        self.advance()
+
+        if self.current_tok.type != TT_IDENTIFIER:
+            return res.failure(
+                SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "Identificador esperado"))
+        
+        var_name = self.current_tok
+        res.register_advancement()
+        self.advance()
+
+        if self.current_tok.type != TT_EQ:
+            return res.failure(
+                SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "'=' esperado"))
+        
+        res.register_advancement()
+        self.advance()
+
+        start_value = res.register(self.expr())
+        if res.error: return res
+
+        if not self.current_tok.matches(TT_KEYWORD, 'hasta'):
+            return res.failure(SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "'hasta' esperado"))
+        
+        res.register_advancement()
+        self.advance()
+
+        end_value = res.register(self.expr())
+        if res.error: return res
+
+        if self.current_tok.matches(TT_KEYWORD, 'paso'):
+            res.register_advancement()
+            self.advance()
+
+            step_value = res.register(self.expr())
+            if res.error: return res
+        else:
+            step_value = None
+
+        if not self.current_tok.matches(TT_KEYWORD, 'pues'):
+            return res.failure(
+                SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "'pues' esperado"))
+        
+        res.register_advancement()
+        self.advance()
+
+        body = res.register(self.expr())
+        if res.error: return res
+
+        return res.success(ForNode(var_name, start_value, end_value, step_value, body))
+    
+    def while_expr(self):
+        res = ParseResult()
+
+        if not self.current_tok.matches(TT_KEYWORD, 'mientras'):
+            return res.failure(
+                SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "'mientras' esperado"))
+        
+        res.register_advancement()
+        self.advance()
+
+        condition = res.register(self.expr())
+        if res.error: return res
+
+        if not self.current_tok.matches(TT_KEYWORD, 'pues'):
+            return res.failure(
+                SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "'pues' esperado"))
+        
+        res.register_advancement()
+        self.advance()
+
+        body = res.register(self.expr())
+        if res.error: return res
+        return res.success(WhileNode(condition, body))
 
     def binary_operation(self, func_a, ops, func_b=None):
         """Refactored logic for handling operators."""
