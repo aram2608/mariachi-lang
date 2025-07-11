@@ -121,7 +121,7 @@ class Interpreter:
             if res.error: return res
             return res.success(result)
 
-        return res.success(None)
+        return res.success(Number(0))
 
     def visit_BlockNode(self, node, context):
         res = RTResult()
@@ -131,8 +131,8 @@ class Interpreter:
             result = res.register(self.visit(statement, context))
             if res.error: return res
 
-        # Return last statement's result (or nada if none)
-        return res.success(result or None)
+        # Return last statement's result
+        return res.success(result or Number(0))
     
     def visit_ForNode(self, node, context):
         res = RTResult()
@@ -162,7 +162,7 @@ class Interpreter:
 
             res.register(self.visit(node.body_node, context))
             if res.error: return res
-        return res.success(None)
+        return res.success(Number(0))
 
     def visit_WhileNode(self, node, context):
         res = RTResult()
