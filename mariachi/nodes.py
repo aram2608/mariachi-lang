@@ -55,3 +55,20 @@ class PrintNode:
 
     def __repr__(self):
         return f'(canta {self.expr_node})'
+    
+class IfNode:
+    def __init__(self, cases, else_case):
+        self.cases = cases
+        self.else_case = else_case
+
+        self.pos_start = self.cases[0][0].pos_start
+        self.pos_end = (self.else_case or self.cases[len(self.cases) - 1][0]).pos_end
+
+class BlockNode:
+    def __init__(self, statements):
+        self.statements = statements
+        self.pos_start = statements[0].pos_start if statements else None
+        self.pos_end = statements[-1].pos_end if statements else None
+
+    def __repr__(self):
+        return f'(bloque {self.statements})'

@@ -72,6 +72,12 @@ class Parser:
                 return res.failure(
                     SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "')' esperado")
                     )
+        # If statement
+        elif tok.matches(TT_KEYWORD, 'si'):
+            if_expr = res.register(self.if_expr())
+            if res.error: return res
+            return res.success(if_expr)
+
         return res.failure(
             SintaxisInvalidoError(tok.pos_start, tok.pos_end, "int, float, identificador, '+', '-', o '(') esperado")
             )
@@ -94,6 +100,35 @@ class Parser:
                 return res
             return res.success(UnaryOpNode(tok, factor))
         return self.power()
+    
+    def statements(self):
+        res = ParseResult()
+        statements = []
+
+        if self.current_tok.type != TT_LBRACE:
+            return res.failure(SintaxisInvalidoError(
+                self.current_tok.pos_start, self.current_tok.pos_end, "'{' esperado"
+            ))
+
+        res.register_advancement()
+        self.advance()
+
+        while self.current_tok.type != TT_RBRACE:
+            stmt = res.register(self.expr())
+            if res.error: return res
+            statements.append(stmt)
+
+            # Optional: allow semicolon or newlines to separate
+            if self.current_tok.type == TT_EOF:
+                return res.failure(SintaxisInvalidoError(
+                    self.current_tok.pos_start, self.current_tok.pos_end, "'}' esperado"
+                ))
+
+        res.register_advancement()
+        self.advance()
+
+        return res.success(BlockNode(statements))
+
 
     def term(self):
         """Creates our terms."""
@@ -122,6 +157,70 @@ class Parser:
                 self.current_tok.pos_start, self.current_tok.pos_end, "int, float, identificador, '+', '-', '(', o 'jamas' esperado"
                 ))
         return res.success(node)
+    
+    def if_expr(self):
+        res = ParseResult()
+        cases = []
+        else_case = None
+
+        if not self.current_tok.matches(TT_KEYWORD, 'si'):
+            return res.failure(SintaxisInvalidoError(
+                self.current_tok.pos_start, self.current_tok.pos_end, f"'si' esperado"))
+
+        res.register_advancement()
+        self.advance()
+
+        condition = res.register(self.comp_expr())
+        if res.error: return res
+
+        if self.current_tok.matches(TT_KEYWORD, 'pues'):
+            res.register_advancement()
+            self.advance()
+            expr = res.register(self.expr())
+            if res.error: return res
+            cases.append((condition, expr))
+        elif self.current_tok.type == TT_LBRACE:
+            expr = res.register(self.statements())
+            if res.error: return res
+            cases.append((condition, expr))
+        else:
+            return res.failure(SintaxisInvalidoError(
+                self.current_tok.pos_start, self.current_tok.pos_end,
+                "'pues' o '{' esperado"))
+
+        while self.current_tok.matches(TT_KEYWORD, 'quizas'):
+            res.register_advancement()
+            self.advance()
+
+            condition = res.register(self.comp_expr())
+            if res.error: return res
+
+            if self.current_tok.matches(TT_KEYWORD, 'pues'):
+                res.register_advancement()
+                self.advance()
+                expr = res.register(self.expr())
+                if res.error: return res
+                cases.append((condition, expr))
+            elif self.current_tok.type == TT_LBRACE:
+                expr = res.register(self.statements())
+                if res.error: return res
+                cases.append((condition, expr))
+            else:
+                return res.failure(SintaxisInvalidoError(
+                    self.current_tok.pos_start, self.current_tok.pos_end,
+                    "'pues' o '{' esperado"))
+
+        if self.current_tok.matches(TT_KEYWORD, 'sino'):
+            res.register_advancement()
+            self.advance()
+
+            if self.current_tok.type == TT_LBRACE:
+                else_case = res.register(self.statements())
+            else:
+                else_case = res.register(self.expr())
+            if res.error: return res
+
+        return res.success(IfNode(cases, else_case))
 
     def expr(self):
         """Creates our expression."""

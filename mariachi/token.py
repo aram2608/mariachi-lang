@@ -13,19 +13,20 @@ KEYWORDS = [
     'y',         # and -
     'o',         # or
     'jamas',     # not
-    
-    'fija',      # const
-    'si',        # if
-    'si no',     # elseif
-    'sino',      # else
     'cierto',    # true
     'falso',     # false
+    'si',        # if
+    'pues',      # then
+    'quizas',    # elseif
+    'sino',      # else
+    'mientras',  # while
+    'para',      # for
+    
+    'fija',      # const
     'entrega',   # return
     'define',    # define
-    'para',      # for
     'canta',     # print
     'invoca',    # class creation
-    'mientras',  # while
     'rompe',     # break
 ]
 
@@ -54,6 +55,8 @@ TT_LTE = 'LTE'
 TT_GTE = 'GTE'
 TT_LPAREN = 'LPAREN'
 TT_RPAREN = 'RPAREN'
+TT_LBRACE = 'LBRACE'
+TT_RBRACE = 'RBRACE'
 TT_COMMENT = 'COMMENT'
 TT_EOF = 'EOF'
 

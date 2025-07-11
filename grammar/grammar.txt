@@ -15,3 +15,7 @@ power   : atom (POW factor)*
 
 atom    : INT | FLOAT | IDENTIFIER | KEYWORD:cierto | KEYWORD:falso | '(' expr ')'
         : LPAREN expr RPAREN
+
+if      : KEYWORD:si expr KEYWORD:entonces expr
+        (KEYWORD:si no expr KEYWORD:entonces expr)*
+        (KEYWORD:sino expr)?

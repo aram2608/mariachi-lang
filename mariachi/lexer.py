@@ -75,6 +75,14 @@ class Lexer:
                 tokens.append(Token(TT_RPAREN, pos_start=self.pos))
                 self.advance()
 
+            # Braces
+            elif self.current_char == '{':
+                tokens.append(Token(TT_LBRACE, pos_start=self.pos))
+                self.advance()
+            elif self.current_char == '}':
+                tokens.append(Token(TT_RBRACE, pos_start=self.pos))
+                self.advance()
+
             # Logical operations
             elif self.current_char == '!':
                 tok, error = self.make_not_equals()
