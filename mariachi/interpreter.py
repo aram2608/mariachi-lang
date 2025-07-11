@@ -40,6 +40,9 @@ class Interpreter:
             result, error = left.power_by(right)
         elif node.op_tok.type == TT_MOD:
             result, error = left.modulo_by(right)
+        elif node.op_tok.type == TT_FLOORDIV:
+            result, error = left.floordiv_by(right)
+
 
         if error:
             return res.failure(error)
@@ -76,6 +79,14 @@ class Interpreter:
                 node.pos_start, node.pos_end, f"'{var_name}' no es definido", context))
         value = value.copy().set_position(node.pos_start, node.pos_end)
         return res.success(value)
+    
+    def visit_PrintNode(self, node, context):
+        res = RTResult()
+        value = res.register(self.visit(node.expr_node, context))
+        if res.error: return res
+        print(value)
+        return res.success(Number(0))  # return nada / 0
+
     
 class SymbolTable:
     def __init__(self):

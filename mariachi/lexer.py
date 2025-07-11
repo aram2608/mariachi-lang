@@ -29,12 +29,20 @@ class Lexer:
         tokens = []
 
         while self.current_char != None:
+
+            # Ignore white spaces
             if self.current_char in ' \t':
                 self.advance()
+
+            # Tokenize numbers
             elif self.current_char in DIGITS:
                 tokens.append(self.make_number())
+
+            # Tokenize identifiers and keywords
             elif self.current_char in LETTERS:
                 tokens.append(self.make_identifier())
+
+            # Math operations
             elif self.current_char == '+':
                 tokens.append(Token(TT_PLUS, pos_start=self.pos))
                 self.advance()
@@ -42,16 +50,23 @@ class Lexer:
                 tokens.append(Token(TT_MINUS, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '*':
-                tokens.append(Token(TT_MUL, pos_start=self.pos))
+                pos_start = self.pos.copy()
                 self.advance()
+                if self.current_char == '*':
+                    tokens.append(Token(TT_POW, pos_start=pos_start))
+                    self.advance()
+                else:
+                    tokens.append(Token(TT_MUL, pos_start=pos_start))
             elif self.current_char == '/':
-                tokens.append(Token(TT_DIV, pos_start=self.pos))
+                pos_start = self.pos.copy()
                 self.advance()
+                if self.current_char == '/':
+                    tokens.append(Token(TT_FLOORDIV, pos_start=pos_start))
+                    self.advance()
+                else:
+                    tokens.append(Token(TT_DIV, pos_start=pos_start))
             elif self.current_char == '%':
                 tokens.append(Token(TT_MOD, pos_start=self.pos))
-                self.advance()
-            elif self.current_char == '^':
-                tokens.append(Token(TT_POW, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '=':
                 tokens.append(Token(TT_EQ, pos_start=self.pos))

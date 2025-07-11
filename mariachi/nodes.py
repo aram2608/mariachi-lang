@@ -46,3 +46,12 @@ class VarAccessNode:
 
         self.pos_start = self.var_name_tok.pos_start
         self.pos_end = self.var_name_tok.pos_end
+
+class PrintNode:
+    def __init__(self, expr_node):
+        self.expr_node = expr_node
+        self.pos_start = expr_node.pos_start
+        self.pos_end = expr_node.pos_end
+
+    def __repr__(self):
+        return f'(canta {self.expr_node})'

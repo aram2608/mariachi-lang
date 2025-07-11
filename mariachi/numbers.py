@@ -53,6 +53,16 @@ class Number:
                 )
             return Number(self.value % other.value).set_context(self.context), None
         
+    def floordiv_by(self, other):
+        """A function to represent floor division."""
+        if isinstance(other, Number):
+            if other.value == 0:
+                return None, EjecucionError(
+                    other.pos_start, other.pos_end, 'Division por zero', self.context
+                )
+        return Number(self.value // other.value).set_context(self.context), None
+
+        
     def copy(self):
         """A function to copy an operations position."""
         copy = Number(self.value)

@@ -86,11 +86,21 @@ class Parser:
 
     def term(self):
         """Creates our terms."""
-        return self.binary_operation(self.factor, (TT_DIV, TT_MUL, TT_MOD))
+        return self.binary_operation(self.factor, (TT_DIV, TT_MUL, TT_MOD, TT_FLOORDIV))
 
     def expr(self):
         """Creates our expression."""
         res = ParseResult()
+
+        # Print statement
+        if self.current_tok.matches(TT_KEYWORD, 'canta'):
+            res.register_advancement()
+            self.advance()
+
+            expr = res.register(self.expr())
+            if res.error:
+                return res
+            return res.success(PrintNode(expr))
 
         # Check to make sure the token matches a keyword
         if self.current_tok.matches(TT_KEYWORD, 'sea'):
