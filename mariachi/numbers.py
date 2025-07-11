@@ -13,6 +13,15 @@ class Number:
         self.pos_end = pos_end
         return self
     
+    def set_context(self, context=None):
+        """Function to set the context."""
+        self.context = context
+        return self
+    
+    def with_meta(self, context, pos_start, pos_end):
+        """Wrapper function to get both postions and context."""
+        return self.set_context(context).set_position(pos_start, pos_end)
+    
     def added_to(self, other):
         """A function to represent addition."""
         if isinstance(other, Number):
@@ -112,10 +121,6 @@ class Number:
         copy.set_position(self.pos_start, self.pos_end)
         copy.set_context(self.context)
         return copy
-        
-    def set_context(self, context=None):
-        self.context = context
-        return self
         
     def __repr__(self):
         return str(self.value)

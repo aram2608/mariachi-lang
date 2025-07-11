@@ -7,7 +7,7 @@ BOLD = '\033[1m'
 RESET = '\033[0m'
 TITLE    = f"{BOLD}{RED}"
 SUBTITLE = f"{GREEN}"
-PROMPT   = f"{RED}mariachi {GREEN}> {RESET}"
+PROMPT = f"{RED}mariachi{RESET} > "
 
 def repl():
     print(f"{TITLE}Saludos desde el Mariachi REPL!{RESET}")

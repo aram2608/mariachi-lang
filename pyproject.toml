@@ -1,14 +1,16 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "mariachi-lang"
+name = "mariachi"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
+description = "Mariachi Lang, a Spanish-inspired toy programming language"
 authors = [
-    { name = "Javier Arambula Rascon", email = "ja1473@Javiers-MacBook-Pro.local" }
+  { name = "Javier Arambula" }
 ]
-requires-python = ">=3.13"
+requires-python = ">=3.8"
 dependencies = []
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+[tool.setuptools]
+include-package-data = true

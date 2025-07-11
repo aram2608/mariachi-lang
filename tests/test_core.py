@@ -1,59 +1,81 @@
 # tests/test_core.py
 
-from mariachi.mariachi import run
+from mariachi.mariachi import run, SymbolTable, Context, Number
+import math
 
-def run_mariachi(code):
-    value, error = run("<test>", code)
+def run_mariachi(code, symbol_table):
+    value, error = run("<test>", code, symbol_table=symbol_table)
     assert error is None
     return value.value if value else None
 
+def test_addition(fresh_table):
+    assert run_mariachi("1 + 2", fresh_table) == 3
 
-def test_addition():
-    assert run_mariachi("1 + 2") == 3
+def test_subtraction(fresh_table):
+    assert run_mariachi("5 - 3", fresh_table) == 2
 
-def test_subtraction():
-    assert run_mariachi("5 - 3") == 2
+def test_multiplication(fresh_table):
+    assert run_mariachi("4 * 2", fresh_table) == 8
 
-def test_multiplication():
-    assert run_mariachi("4 * 2") == 8
+def test_division(fresh_table):
+    assert run_mariachi("10 / 2", fresh_table) == 5
 
-def test_division():
-    assert run_mariachi("10 / 2") == 5
+def test_power(fresh_table):
+    assert run_mariachi("2 ** 3", fresh_table) == 8
 
-def test_power():
-    assert run_mariachi("2 ** 3") == 8
+def test_modulo(fresh_table):
+    assert run_mariachi("10 % 3", fresh_table) == 1
 
-def test_modulo():
-    assert run_mariachi("10 % 3") == 1
+def test_floordiv(fresh_table):
+    assert run_mariachi("10 // 3", fresh_table) == 3
 
-def test_floordiv():
-    assert run_mariachi("10 // 3") == 3
+def test_equals(fresh_table):
+    assert run_mariachi("2 == 2", fresh_table) == 1
+    assert run_mariachi("2 == 3", fresh_table) == 0
 
-def test_equals():
-    assert run_mariachi("2 == 2") == 1
-    assert run_mariachi("2 == 3") == 0
+def test_not_equals(fresh_table):
+    assert run_mariachi("2 != 3", fresh_table) == 1
+    assert run_mariachi("2 != 2", fresh_table) == 0
 
-def test_not_equals():
-    assert run_mariachi("2 != 3") == 1
-    assert run_mariachi("2 != 2") == 0
+def test_comparisons(fresh_table):
+    assert run_mariachi("2 < 3", fresh_table) == 1
+    assert run_mariachi("3 <= 3", fresh_table) == 1
+    assert run_mariachi("4 > 2", fresh_table) == 1
+    assert run_mariachi("4 >= 5", fresh_table) == 0
 
-def test_comparisons():
-    assert run_mariachi("2 < 3") == 1
-    assert run_mariachi("3 <= 3") == 1
-    assert run_mariachi("4 > 2") == 1
-    assert run_mariachi("4 >= 5") == 0
+def test_logical_ops(fresh_table):
+    assert run_mariachi("1 y 0", fresh_table) == 0
+    assert run_mariachi("1 o 0", fresh_table) == 1
+    assert run_mariachi("jamas 0", fresh_table) == 1
+    assert run_mariachi("jamas 1", fresh_table) == 0
 
-def test_logical_ops():
-    assert run_mariachi("1 y 0") == 0
-    assert run_mariachi("1 o 0") == 1
-    assert run_mariachi("jamas 0") == 1
-    assert run_mariachi("jamas 1") == 0
+def test_variable_assign(fresh_table):
+    run_mariachi("sea x = 7", fresh_table)
+    assert run_mariachi("x + 3", fresh_table) == 10
 
-def test_variable_assign():
-    run_mariachi("sea x = 7")
-    assert run_mariachi("x + 3") == 10
+def test_variable_access(fresh_table):
+    run_mariachi("sea x = 7", fresh_table)
+    assert run_mariachi("x", fresh_table) == 7
 
-def test_loop_for():
-    run_mariachi("sea r = 1")
-    run_mariachi("para i = 1 hasta 6 pues sea r = r * i")
-    assert run_mariachi("r") == 120
+def test_loop_for(fresh_table):
+    run_mariachi("sea r = 1", fresh_table)
+    run_mariachi("para i = 1 hasta 6 pues sea r = r * i", fresh_table)
+    assert run_mariachi("r", fresh_table) == 120
+
+def test_constants(fresh_table):
+    run_mariachi("fija PI = 3.14", fresh_table)
+    result = run_mariachi("PI + 1", fresh_table)
+    assert math.isclose(result, 4.14, rel_tol=1e-9)
+
+def test_const_overwrite():
+    symbol_table = SymbolTable()
+    context = Context('test')
+    context.symbol_table = symbol_table
+
+    x = Number(4).set_context(context)
+    symbol_table.set('x', x)
+
+    try:
+        symbol_table.set_const('x', Number(10).set_context(context))
+    except Exception as e:
+        assert str(e) == "'x' ya está definido y no se puede redefinir como constante"

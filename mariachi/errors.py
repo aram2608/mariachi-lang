@@ -44,7 +44,7 @@ class EjecucionError(Error):
         ctx = self.context
 
         while ctx:
-            result = f' Fichero {pos.fn}, lina {str(pos.ln + 1)}, en {ctx.display_name}\n'
+            result = f' Archivo {pos.fn}, linea {str(pos.ln + 1)}, en {ctx.display_name}\n' + result
             pos = ctx.parent_entry_pos
             ctx = ctx.parent
         return 'Retrazo (funcion mas reciente):\n' + result

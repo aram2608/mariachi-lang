@@ -17,7 +17,7 @@ class Interpreter:
         raise Exception(f'No visit_{type(node).__name__} method defined.')
     
     def visit_NumberNode(self, node, context):
-        return RTResult().success(Number(node.tok.value).set_context(context).set_position(node.pos_start, node.pos_end))
+        return RTResult().success(Number(node.tok.value).with_meta(context, node.pos_start, node.pos_end))
 
     def visit_BinaryOpNode(self, node, context):
         res = RTResult()
@@ -120,6 +120,17 @@ class Interpreter:
 
         return res.success(value)
     
+    def visit_ConstAccessNode(self, node, context):
+        res = RTResult()
+        var_name = node.var_name_tok.value
+        value = context.symbol_table.get(var_name)
+
+        if not value:
+            return res.failure(EjecucionError(
+                node.pos_start, node.pos_end, f"'{var_name}' no es definido", context))
+        value = value.copy().set_position(node.pos_start, node.pos_end)
+        return res.success(value)
+    
     def visit_PrintNode(self, node, context):
         res = RTResult()
         value = res.register(self.visit(node.expr_node, context))
@@ -219,6 +230,8 @@ class SymbolTable:
         self.symbols[name] = value
 
     def set_const(self, name, value):
+        if name in self.symbols or name in self.constants:
+            raise Exception(f"'{name}' ya está definido y no se puede redefinir como constante")
         self.constants[name] = value
 
     def remove(self, name):
