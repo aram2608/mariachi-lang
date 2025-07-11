@@ -10,6 +10,7 @@ LETTERS_DIGITS = LETTERS + DIGITS
 
 KEYWORDS = [
     'sea',       # let
+    'fija',      # const
     'y',         # and
     'o',         # or
     'jamas',     # not
@@ -24,8 +25,8 @@ KEYWORDS = [
     'para',      # for
     'hasta',     # to
     'paso',      # step
+    'anonimo',   # define an anonymous func
 
-    'fija',      # const
     'entrega',   # return
     'define',    # define
     'invoca',    # class creation
@@ -36,12 +37,11 @@ KEYWORDS = [
     'canta',     # print
 ]
 
-
 #################################
 # TOKENS
 #################################
 
-TT_INT = 'TT_INT'
+TT_INT = 'INT'
 TT_FLOAT = 'FLOAT'
 TT_IDENTIFIER = 'IDENTIFIER'
 TT_KEYWORD = 'KEYWORD'
@@ -63,6 +63,8 @@ TT_LPAREN = 'LPAREN'
 TT_RPAREN = 'RPAREN'
 TT_LBRACE = 'LBRACE'
 TT_RBRACE = 'RBRACE'
+TT_COMMA = 'COMMA'
+TT_ARROW = 'ARROW'
 TT_COMMENT = 'COMMENT'
 TT_EOF = 'EOF'
 

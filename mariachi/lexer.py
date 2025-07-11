@@ -47,24 +47,29 @@ class Lexer:
                 tokens.append(Token(TT_PLUS, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '-':
-                tokens.append(Token(TT_MINUS, pos_start=self.pos))
+                pos_start = self.pos.copy()
                 self.advance()
+                if self.current_char == '>':
+                    tokens.append(Token(TT_ARROW, pos_start=pos_start, pos_end=self.pos))
+                    self.advance()
+                else:
+                    tokens.append(Token(TT_MINUS, pos_start=pos_start, pos_end=self.pos))
             elif self.current_char == '*':
                 pos_start = self.pos.copy()
                 self.advance()
                 if self.current_char == '*':
-                    tokens.append(Token(TT_POW, pos_start=pos_start))
+                    tokens.append(Token(TT_POW, pos_start=pos_start, pos_end=self.pos))
                     self.advance()
                 else:
-                    tokens.append(Token(TT_MUL, pos_start=pos_start))
+                    tokens.append(Token(TT_MUL, pos_start=pos_start, pos_end=self.pos))
             elif self.current_char == '/':
                 pos_start = self.pos.copy()
                 self.advance()
                 if self.current_char == '/':
-                    tokens.append(Token(TT_FLOORDIV, pos_start=pos_start))
+                    tokens.append(Token(TT_FLOORDIV, pos_start=pos_start, pos_end=self.pos))
                     self.advance()
                 else:
-                    tokens.append(Token(TT_DIV, pos_start=pos_start))
+                    tokens.append(Token(TT_DIV, pos_start=pos_start, pos_end=self.pos))
             elif self.current_char == '%':
                 tokens.append(Token(TT_MOD, pos_start=self.pos))
                 self.advance()
@@ -94,6 +99,12 @@ class Lexer:
                 tokens.append(self.make_less_than())
             elif self.current_char == '>':
                 tokens.append(self.make_greater_than())
+
+            # Commas and comments
+            elif self.current_char == ',':
+                tokens.append(Token(TT_COMMA, pos_start=self.pos))
+            elif self.current_char == '#':
+                tokens.append(Token(TT_COMMENT, pos_start=self.pos))
             else:
                 pos_start = self.pos.copy()
                 char = self.current_char

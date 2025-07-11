@@ -1,41 +1,32 @@
 from .errors import *
+from .values import *
 
-class Number:
+class Number(Value):
     """Class for defining arithmetic logic."""
     def __init__(self, value):
+        super().__init__()
         self.value = value
-        self.set_position()
-        self.set_context()
-
-    def set_position(self, pos_start=None, pos_end=None):
-        """Sets positions for error tracking."""
-        self.pos_start = pos_start
-        self.pos_end = pos_end
-        return self
-    
-    def set_context(self, context=None):
-        """Function to set the context."""
-        self.context = context
-        return self
-    
-    def with_meta(self, context, pos_start, pos_end):
-        """Wrapper function to get both postions and context."""
-        return self.set_context(context).set_position(pos_start, pos_end)
     
     def added_to(self, other):
         """A function to represent addition."""
         if isinstance(other, Number):
             return Number(self.value + other.value).set_context(self.context), None
+        else:
+            return None, Value.illegal_operation(self, other)
         
     def subbed_by(self, other):
         """A function to represent subtraction."""
         if isinstance(other, Number):
             return Number(self.value - other.value).set_context(self.context), None
+        else:
+            return None, Value.illegal_operation(self, other)
         
     def multed_by(self, other):
         """A function to represent multiplication."""
         if isinstance(other, Number):
             return Number(self.value * other.value).set_context(self.context), None
+        else:
+            return None, Value.illegal_operation(self, other)
         
     def divided_by(self, other):
         """A function to represent division."""
@@ -46,11 +37,15 @@ class Number:
                     self.context
                 )
             return Number(self.value / other.value).set_context(self.context), None
+        else:
+            return None, Value.illegal_operation(self, other)
         
     def power_by(self, other):
         """A function to represent power multiplication."""
         if isinstance(other, Number):
             return Number(self.value ** other.value).set_context(self.context), None
+        else:
+            return None, Value.illegal_operation(self, other)
         
     def modulo_by(self, other):
         """A function to represent modulo operations."""
@@ -61,6 +56,8 @@ class Number:
                     self.context
                 )
             return Number(self.value % other.value).set_context(self.context), None
+        else:
+            return None, Value.illegal_operation(self, other)
         
     def floordiv_by(self, other):
         """A function to represent floor division."""
@@ -69,45 +66,63 @@ class Number:
                 return None, EjecucionError(
                     other.pos_start, other.pos_end, 'Division por zero', self.context
                 )
-        return Number(self.value // other.value).set_context(self.context), None
+            return Number(self.value // other.value).set_context(self.context), None
+        else:
+            return None, Value.illegal_operation(self, other)
     
     def get_comparison_eq(self, other):
         """Handles equals comparisons."""
         if isinstance(other, Number):
             return Number(int(self.value == other.value)).set_context(self.context), None
+        else:
+            return None, Value.illegal_operation(self, other)
         
     def get_comparison_ne(self, other):
             """Handles inequality operations."""
             if isinstance(other, Number):
                 return Number(int(self.value != other.value)).set_context(self.context), None
+            else:
+                return None, Value.illegal_operation(self, other)
 
     def get_comparison_lt(self, other):
         """Less than comparisons."""
         if isinstance(other, Number):
             return Number(int(self.value < other.value)).set_context(self.context), None
+        else:
+            return None, Value.illegal_operation(self, other)
 
     def get_comparison_lte(self, other):
         """Less than or equal to comparisons."""
         if isinstance(other, Number):
             return Number(int(self.value <= other.value)).set_context(self.context), None
+        else:
+            return None, Value.illegal_operation(self, other)
 
     def get_comparison_gt(self, other):
         """Greater than comparisons."""
         if isinstance(other, Number):
             return Number(int(self.value > other.value)).set_context(self.context), None
+        else:
+            return None, Value.illegal_operation(self, other)
 
     def get_comparison_gte(self, other):
         """Greater than or equal to comparisons."""
         if isinstance(other, Number):
             return Number(int(self.value >= other.value)).set_context(self.context), None
+        else:
+            return None, Value.illegal_operation(self, other)
 
     def anded_by(self, other):
         if isinstance(other, Number):
             return Number(int(self.value and other.value)).set_context(self.context), None
+        else:
+            return None, Value.illegal_operation(self, other)
 
     def ored_by(self, other):
         if isinstance(other, Number):
             return Number(int(self.value or other.value)).set_context(self.context), None
+        else:
+            return None, Value.illegal_operation(self, other)
         
     def notted(self):
         return Number(1 if self.value == 0 else 0).set_context(self.context), None

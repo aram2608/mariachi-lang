@@ -11,15 +11,16 @@ term    : factor ((MUL|DIV|MOD) factor)*
 factor  : (PLUS|MINUS) factor
         : power
 
-power   : atom (POW factor)*
+power   : call (POW factor)*
+
+call    : atom (LPAREN (expr (COMMA expr)*)? RPAREN)?
 
 atom    : INT | FLOAT | IDENTIFIER | KEYWORD:cierto | KEYWORD:falso | KEYWORD:nada | '(' expr ')'
         : LPAREN expr RPAREN
         : if
         : while
         : stat
-
-stat    : KEYWORD:si expr LBRACE expr RBRACE
+        : define
 
 if      : KEYWORD:si expr KEYWORD:entonces expr
         (KEYWORD:si no expr KEYWORD:entonces expr)*
@@ -29,3 +30,10 @@ for     : KEYWORD:para IDENTIFIER EQ expr KEYWORD:hasta expr
         (KEYWORD:paso expr)? KEYWORD:entonces expr
 
 while   : KEYWORD:mientras expr KEYWORD:entonces expr
+
+define  : KEYWORD:define IDENTIFIER?
+        : LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN
+        : ARROW expr
+        : LBRACE expr RBRACE
+
+stat    : KEYWORD:si expr LBRACE expr RBRACE
