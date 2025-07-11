@@ -15,7 +15,7 @@ power   : call (POW factor)*
 
 call    : atom (LPAREN (expr (COMMA expr)*)? RPAREN)?
 
-atom    : INT | FLOAT | IDENTIFIER | KEYWORD:cierto | KEYWORD:falso | KEYWORD:nada | '(' expr ')'
+atom    : INT | FLOAT | IDENTIFIER | KEYWORD:cierto | KEYWORD:falso | KEYWORD:nada | STRING
         : LPAREN expr RPAREN
         : if
         : while

@@ -1,6 +1,6 @@
 # tests/test_core.py
 
-from mariachi.mariachi import run, SymbolTable, Context, Number
+from mariachi.mariachi import run, SymbolTable, Context, Number, Function
 import math
 
 def run_mariachi(code, symbol_table):
@@ -79,3 +79,18 @@ def test_const_overwrite():
         symbol_table.set_const('x', Number(10).set_context(context))
     except Exception as e:
         assert str(e) == "'x' ya está definido y no se puede redefinir como constante"
+
+def test_function_declaration(fresh_table):
+    run('programma', "define hola(x) { x + 1 }", fresh_table)
+    result, error = run('programma', "hola(2)", fresh_table)
+    print("type(result):", type(result))
+    print("repr(result):", repr(result))
+    print("str(result):", str(result))
+    assert result.value == 3
+
+def test_string(fresh_table):
+    result = run_mariachi('"this is a string"', fresh_table)
+    run_mariachi('sea x = "this is a string"', fresh_table)
+    result_2 = run_mariachi("x", fresh_table)
+    assert result == 'this is a string'
+    assert result_2 == 'this is a string'

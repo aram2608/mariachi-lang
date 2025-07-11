@@ -42,6 +42,10 @@ class Lexer:
             elif self.current_char in LETTERS:
                 tokens.append(self.make_identifier())
 
+            # Handle strings
+            elif self.current_char == '"':
+                tokens.append(self.make_string())
+
             # Math operations
             elif self.current_char == '+':
                 tokens.append(Token(TT_PLUS, pos_start=self.pos))
@@ -195,6 +199,32 @@ class Lexer:
             self.advance()
             tok_type = TT_GTE
         return Token(tok_type, pos_start=pos_start, pos_end=self.pos)
+    
+    def make_string(self):
+        string_ = ''
+        pos_start = self.pos.copy()
+        escape = False
+        self.advance()
+
+        escape_characters = {
+            'n': '\n',
+            't': '\t',
+            'b': '\b',
+            }
+
+        while self.current_char != None and (self.current_char != '"' or escape):
+            if escape:
+                string_ += escape_characters.get(self.current_char, self.current_char)
+                escape = False
+            else:
+                if self.current_char =='\\':
+                    escape = True
+                else:
+                    string_ += self.current_char
+            self.advance()
+
+        self.advance()
+        return Token(TT_STRING, string_, pos_start, pos_end=self.pos)
     
 class Position:
     """A class to store the position of the different code attributes."""

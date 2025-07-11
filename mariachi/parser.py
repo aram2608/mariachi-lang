@@ -39,6 +39,12 @@ class Parser:
             self.advance()
             return res.success(NumberNode(tok))
         
+        # Handling strings
+        elif tok.type == (TT_STRING):
+            res.register_advancement()
+            self.advance()
+            return res.success(StringNode(tok))
+        
         # Check for identifier
         elif tok.type == TT_IDENTIFIER:
             res.register_advancement()
@@ -448,6 +454,9 @@ class Parser:
 
         if self.current_tok.type == TT_IDENTIFIER:
             var_name_tok = self.current_tok
+            res.register_advancement()
+            self.advance()
+
             if self.current_tok.type != TT_LPAREN:
                 return res.failure(
                     SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "'(' esperado"))
@@ -480,11 +489,12 @@ class Parser:
                 res.register_advancement()
                 self.advance()
 
-                if self.current_tok.type != TT_RPAREN:
-                    return res.failure(
+            if self.current_tok.type != TT_RPAREN:
+                return res.failure(
                     SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "')' esperado"))
         else:
-            return res.failure(
+            if self.current_tok.type != TT_RPAREN:
+                return res.failure(
                     SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "'identificador o '(' esperado"))
         
         res.register_advancement()
@@ -497,7 +507,7 @@ class Parser:
         
         res.register_advancement()
         self.advance()
-        node_to_return = res.register(self.statements())
+        node_to_return = res.register(self.expr())
         if res.error: return res
 
         if self.current_tok.type != TT_RBRACE:
