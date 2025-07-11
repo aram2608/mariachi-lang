@@ -13,7 +13,7 @@ factor  : (PLUS|MINUS) factor
 
 power   : atom (POW factor)*
 
-atom    : INT | FLOAT | IDENTIFIER | KEYWORD:cierto | KEYWORD:falso | '(' expr ')'
+atom    : INT | FLOAT | IDENTIFIER | KEYWORD:cierto | KEYWORD:falso | KEYWORD:nada | '(' expr ')'
         : LPAREN expr RPAREN
         : if
         : while

@@ -66,6 +66,11 @@ class Number:
         """Handles equals comparisons."""
         if isinstance(other, Number):
             return Number(int(self.value == other.value)).set_context(self.context), None
+        
+    def get_comparison_ne(self, other):
+            """Handles inequality operations."""
+            if isinstance(other, Number):
+                return Number(int(self.value != other.value)).set_context(self.context), None
 
     def get_comparison_lt(self, other):
         """Less than comparisons."""

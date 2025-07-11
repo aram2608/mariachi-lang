@@ -22,6 +22,10 @@ class SintaxisInvalidoError(Error):
     def __init__(self, pos_start, pos_end, details=''):
         super().__init__(pos_start, pos_end, 'Sintaxis Invalido', details)
 
+class CaracterEsperadoError(Error):
+    def __init__(self, pos_start, pos_end, details):
+        super().__init__(pos_start, pos_end, 'Caracter esperado', details)
+
 class EjecucionError(Error):
     def __init__(self, pos_start, pos_end, details, context):
         super().__init__(pos_start, pos_end, 'Ejecucion error', details)
@@ -32,18 +36,7 @@ class EjecucionError(Error):
         result += f'{self.error_name}: {self.details}'
         result += '\n' + string_with_arrows(self.pos_start.ftxt, self.pos_start, self.pos_end)
         return result
-
-class CaracterEsperadoError(Error):
-    def __init__(self, pos_start, pos_end, details):
-        super().__init__(pos_start, pos_end, 'Caracter esperado', details)
-
-    def as_string(self):
-        """Custom method to represent errors as strings."""
-        result = self.generate_traceback()
-        result += f'{self.error_name}: {self.details}'
-        result += '\n' + string_with_arrows(self.pos_start.ftxt, self.pos_start, self.pos_end)
-        return result
-
+    
     def generate_traceback(self):
         """Generates a traceback for error handling."""
         result = ''

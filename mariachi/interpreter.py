@@ -42,6 +42,8 @@ class Interpreter:
             result, error = left.modulo_by(right)
         elif node.op_tok.type == TT_FLOORDIV:
             result, error = left.floordiv_by(right)
+        elif node.op_tok.type == TT_NE:
+            result, error = left.get_comparison_ne(right)
         elif node.op_tok.type == TT_EE:
             result, error = left.get_comparison_eq(right)
         elif node.op_tok.type == TT_LT:
@@ -56,6 +58,12 @@ class Interpreter:
             result, error = left.anded_by(right)
         elif node.op_tok.matches(TT_KEYWORD, 'o'):
             result, error = left.ored_by(right)
+        else:
+            return res.failure(EjecucionError(
+                node.pos_start, node.pos_end,
+                f"Operador desconocido '{node.op_tok}'",
+                context
+            ))
 
         if error:
             return res.failure(error)
@@ -97,6 +105,21 @@ class Interpreter:
         value = value.copy().set_position(node.pos_start, node.pos_end)
         return res.success(value)
     
+    def visit_ConstAssignNode(self, node, context):
+        res = RTResult()
+        name = node.const_name_tok.value
+        value = res.register(self.visit(node.value_node, context))
+        if res.error: return res
+
+        try:
+            context.symbol_table.set_const(name, value)
+        except Exception as e:
+            return res.failure(EjecucionError(
+                node.pos_start, node.pos_end, str(e), context
+            ))
+
+        return res.success(value)
+    
     def visit_PrintNode(self, node, context):
         res = RTResult()
         value = res.register(self.visit(node.expr_node, context))
@@ -121,7 +144,7 @@ class Interpreter:
             if res.error: return res
             return res.success(result)
 
-        return res.success(Number(0))
+        return res.success(None)
 
     def visit_BlockNode(self, node, context):
         res = RTResult()
@@ -132,7 +155,7 @@ class Interpreter:
             if res.error: return res
 
         # Return last statement's result
-        return res.success(result or Number(0))
+        return res.success(result or None)
     
     def visit_ForNode(self, node, context):
         res = RTResult()
@@ -162,7 +185,7 @@ class Interpreter:
 
             res.register(self.visit(node.body_node, context))
             if res.error: return res
-        return res.success(Number(0))
+        return res.success(None)
 
     def visit_WhileNode(self, node, context):
         res = RTResult()
@@ -179,19 +202,26 @@ class Interpreter:
 class SymbolTable:
     def __init__(self):
         self.symbols = {}
+        self.constants = {}
         self.parent = None
 
     def get(self, name):
-        """Function to get the value of a variable name."""
-        value = self.symbols.get(name, None)
-        if value == None and self.parent:
+        value = self.symbols.get(name)
+        if value is None:
+            value = self.constants.get(name)
+        if value is None and self.parent:
             return self.parent.get(name)
         return value
-    
+
     def set(self, name, value):
-        """Sets the key value pairs of the symbols dictionary."""
+        if name in self.constants:
+            raise Exception(f"'{name}' es una constante y no se puede cambiar")
         self.symbols[name] = value
 
+    def set_const(self, name, value):
+        self.constants[name] = value
+
     def remove(self, name):
-        """Removes a variable from the sybmols."""
+        if name in self.constants:
+            raise Exception(f"'{name}' es una constante y no se puede borrar")
         del self.symbols[name]

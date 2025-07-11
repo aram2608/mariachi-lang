@@ -1,0 +1,5 @@
+sea resultado = 1
+para i = 1 hasta 10 paso 1 pues resultado = resultado * i
+
+sea r = 1
+para i = 5 hasta 0 paso -1 pues sea r = r * i

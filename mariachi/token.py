@@ -10,10 +10,11 @@ LETTERS_DIGITS = LETTERS + DIGITS
 
 KEYWORDS = [
     'sea',       # let
-    'y',         # and -
+    'y',         # and
     'o',         # or
     'jamas',     # not
     'cierto',    # true
+    'nada',      # null or 0
     'falso',     # false
     'si',        # if
     'pues',      # then
@@ -23,13 +24,16 @@ KEYWORDS = [
     'para',      # for
     'hasta',     # to
     'paso',      # step
-    
+
     'fija',      # const
     'entrega',   # return
     'define',    # define
-    'canta',     # print
     'invoca',    # class creation
     'rompe',     # break
+    'sigue',     # continue
+
+    'baila',     # could be cool but dont know what it would do
+    'canta',     # print
 ]
 
 

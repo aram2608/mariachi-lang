@@ -2,10 +2,7 @@ from .numbers import *
 from .lexer import *
 from .parser import *
 
-global_symbol_table = SymbolTable()
-global_symbol_table.set("nada", Number(0))
-
-def run(fn, code):
+def run(fn, code, symbol_table=None):
     """The code runner used to parse the code and tokenize inputs."""
     # Generates the tokens
     lexer = Lexer(fn, code)
@@ -22,6 +19,11 @@ def run(fn, code):
     # Run interpreter
     interpreter = Interpreter()
     context = Context('<programma>')
-    context.symbol_table = global_symbol_table
+
+    # Declares a fresh symbol table each run time
+    if symbol_table == None:
+        symbol_table = SymbolTable()
+
+    context.symbol_table = symbol_table
     result = interpreter.visit(ast.node, context)
     return result.value, result.error

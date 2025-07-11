@@ -55,6 +55,12 @@ class Parser:
             res.register_advancement()
             self.advance()
             return res.success(NumberNode(Token(TT_INT, 0, tok.pos_start, tok.pos_end)))
+        
+        # Null check
+        elif tok.matches(TT_KEYWORD, 'nada'):
+            res.register_advancement()
+            self.advance()
+            return res.success(NumberNode(Token(TT_INT, 0, tok.pos_start, tok.pos_end)))
 
         # Parenthesis check
         elif tok.type == TT_LPAREN:
@@ -85,7 +91,7 @@ class Parser:
             return res.success(for_expr)
         
         # While expression
-        elif tok.matches(TT_KEYWORD, 'para'):
+        elif tok.matches(TT_KEYWORD, 'mientras'):
             while_expr = res.register(self.while_expr())
             if res.error: return res
             return res.success(while_expr)
@@ -246,8 +252,32 @@ class Parser:
             if res.error:
                 return res
             return res.success(PrintNode(expr))
+        
+        # Assigning constants
+        if self.current_tok.matches(TT_KEYWORD, 'fija'):
+            res.register_advancement()
+            self.advance()
 
-        # Check to make sure the token matches a keyword
+            if self.current_tok.type != TT_IDENTIFIER:
+                return res.failure(SintaxisInvalidoError(
+                    self.current_tok.pos_start, self.current_tok.pos_end, "Identificador esperado"))
+
+            const_name = self.current_tok
+            res.register_advancement()
+            self.advance()
+
+            if self.current_tok.type != TT_EQ:
+                return res.failure(SintaxisInvalidoError(
+                    self.current_tok.pos_start, self.current_tok.pos_end, "'=' esperado"))
+
+            res.register_advancement()
+            self.advance()
+
+            value = res.register(self.expr())
+            if res.error: return res
+            return res.success(ConstAssignNode(const_name, value))
+
+        # Assigning variables
         if self.current_tok.matches(TT_KEYWORD, 'sea'):
             res.register_advancement()
             self.advance()
