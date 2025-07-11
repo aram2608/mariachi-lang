@@ -1,4 +1,4 @@
-from .numbers import *
+from .types import *
 from .lexer import *
 from .parser import *
 
