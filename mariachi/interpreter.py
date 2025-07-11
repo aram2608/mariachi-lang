@@ -169,6 +169,7 @@ class Interpreter:
     
     def visit_ForNode(self, node, context):
         res = RTResult()
+        elements = []
 
         start_value = res.register(self.visit(node.start_value_node, context))
         if res.error: return res
@@ -193,21 +194,22 @@ class Interpreter:
             context.symbol_table.set(node.var_name_tok.value, Number(i))
             i += step_value.value
 
-            res.register(self.visit(node.body_node, context))
+            elements.append(res.register(self.visit(node.body_node, context)))
             if res.error: return res
-        return res.success(None)
+        return res.success(List(elements).with_meta(context, pos_start=node.pos_start, pos_end=node.pos_end))
 
     def visit_WhileNode(self, node, context):
         res = RTResult()
+        elements = []
         while True:
             condition = res.register(self.visit(node.condition_node, context))
             if res.error: return res
 
             if not condition.is_true(): break
 
-            res.register(self.visit(node.body_node, context))
+            elements.append(res.register(self.visit(node.body_node, context)))
             if res.error: return res
-        return res.success(None)
+        return res.success(List(elements).with_meta(context, pos_start=node.pos_start, pos_end=node.pos_end))
     
     def visit_FuncDefNode(self, node, context):
         res = RTResult()
@@ -243,6 +245,29 @@ class Interpreter:
         return RTResult().success(
             String(node.tok.value).with_meta(context, node.pos_start, node.pos_end))
     
+    def visit_ListNode(self, node, context):
+        res = ParseResult()
+        elements = []
+
+        for element_node in node.element_nodes:
+            elements.append(res.register(self.visit(element_node, context)))
+            if res.error: return res
+
+        return res.success(
+            List(elements).with_meta(context, pos_start=node.pos_start, pos_end=node.pos_end))
+    
+    def visit_ConcatNode(self, node, context):
+        res = ParseResult()
+        left = self.visit(node.left_node)
+        right = self.visit(node.right_node)
+
+        # Handle string or list concatenation
+        if isinstance(left, str) and isinstance(right, str):
+            pass
+        else:
+            return res.failure(EjecucionError(
+                node.pos_start, node.pos_end, f"'No se puede trenzar: {type(left)} y {type(right)}", context))
+
 class SymbolTable:
     def __init__(self, parent=None):
         self.symbols = {}
@@ -565,3 +590,52 @@ class String(Value):
     
     def __repr__(self):
         return f"{self.value}"
+    
+class List(Value):
+    def __init__(self, elements):
+        super().__init__()
+        self.elements = elements
+
+    def add_item(self, other):
+        new_list = self.copy()
+        new_list.elements.append(other)
+        return new_list, None
+    
+    def concat_list(self, other):
+        if isinstance(other, List):
+            new_list = self.copy()
+            new_list.elements.extend(other.elements)
+            return new_list, None
+        else:
+            return None, self.illegal_operation(self, other)
+        
+    def remove_item(self, other):
+        if isinstance(other, Number):
+            new_list = self.copy()
+            try:
+                new_list.elements.pop(other.value)
+                return new_list, None
+            except:
+                return None, EjecucionError(
+                    other.pos_start, other.pos_end, 'El indice esta afuera de la lista', self.context)
+        else:
+            return None, self.illegal_operation(self, other)
+        
+    def get_item(self, other):
+        if isinstance(other, Number):
+            try:
+                return self.elements[other.value], None
+            except:
+                return None, EjecucionError(
+                    other.pos_start, other.pos_end, 'El indice esta afuera de la lista', self.context)
+        else:
+            return None, self.illegal_operation(self, other)
+        
+    def copy(self):
+        copy = List(self.elements[:])
+        copy.set_pos(self.pos_start, self.pos_end)
+        copy.set_context(self.context)
+        return copy
+    
+    def __repr__(self):
+        return f'[{", ".join([str(x) for x in self.elements])}]'

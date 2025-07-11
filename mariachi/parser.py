@@ -51,6 +51,12 @@ class Parser:
             self.advance()
             return res.success(VarAccessNode(tok))
         
+        # Check for brackes
+        elif tok.type == TT_LSQUARE:
+            list_expr = res.register(self.list_expr())
+            if res.error: return res
+            return res.success(list_expr)
+        
         # Boolean check
         elif tok.matches(TT_KEYWORD, 'cierto'):
             res.register_advancement()
@@ -218,9 +224,49 @@ class Parser:
         node = res.register(self.binary_operation(self.arith_expr, (TT_EE, TT_NE, TT_LT, TT_LTE, TT_GT, TT_GTE)))
         if res.error:
             return res.failure(SintaxisInvalidoError(
-                self.current_tok.pos_start, self.current_tok.pos_end, "int, float, identificador, '+', '-', '(', o 'jamas' esperado"
+                self.current_tok.pos_start, self.current_tok.pos_end, "int, float, identificador, '+', '-', '(', '[', o 'jamas' esperado"
                 ))
         return res.success(node)
+    
+    def list_expr(self):
+        res = ParseResult()
+        element_nodes = []
+        pos_start = self.current_tok.pos_start.copy()
+
+        if self.current_tok.type != TT_LSQUARE:
+            return res.failure(
+                SintaxisInvalidoError(
+                self.current_tok.pos_start, self.current_tok.pos_end, f"'[' esperado"))
+        
+        res.register_advancement()
+        self.advance()
+
+        if self.current_tok.type == TT_RSQUARE:
+            res.register_advancement()
+            self.advance()
+        else:
+            element_nodes.append(res.register(self.expr()))
+            if res.error:
+                return res.failure(
+                    SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, 
+                                "']', 'sea', int, float, identificador, '+', '-', '[', o 'jamas' esperado"))
+                
+            while self.current_tok.type == TT_COMMA:
+                res.register_advancement()
+                self.advance()
+
+                element_nodes.append(res.register(self.expr()))
+                if res.error: return res
+
+            if self.current_tok.type != TT_RSQUARE:
+                return res.failure(
+                        SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, 
+                                    "',' o ']' esperado"))
+                
+            res.register_advancement()
+            self.advance()
+        return res.success(ListNode(element_nodes, pos_start, self.current_tok.pos_end))
+        
     
     def if_expr(self):
         res = ParseResult()
@@ -356,7 +402,7 @@ class Parser:
         if res.error: 
             return res.failure(
                 SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, 
-                                    "'sea', int, float, identificador, '+', '-', '(', o 'jamas' esperado"))
+                                    "'sea', int, float, identificador, '+', '-', '(', '[', o 'jamas' esperado"))
         return res.success(node)
     
     def for_expr(self):

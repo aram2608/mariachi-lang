@@ -27,6 +27,11 @@ KEYWORDS = [
     'paso',      # step
     'anonimo',   # define an anonymous func
 
+    'roba',      # retrieve an item from a list
+    'borra',     # delete a list item
+    'pon',       # add a list item
+    'trenza',    # concatenate
+
     'entrega',   # return
     'define',    # define
     'invoca',    # class creation
@@ -64,6 +69,8 @@ TT_LPAREN = 'LPAREN'
 TT_RPAREN = 'RPAREN'
 TT_LBRACE = 'LBRACE'
 TT_RBRACE = 'RBRACE'
+TT_LSQUARE = 'LSQUARE'
+TT_RSQUARE = 'RSQUARE'
 TT_COMMA = 'COMMA'
 TT_ARROW = 'ARROW'
 TT_COMMENT = 'COMMENT'
