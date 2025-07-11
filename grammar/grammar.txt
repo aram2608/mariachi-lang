@@ -1,5 +1,10 @@
 expr    : KEYWORD:sea IDENTIFIER EQ expr \\ lowest priority
-        : term ((PLUS|MINUS) term)* 
+        : comp (KEYWORD:y|KEYWORD:o) comp)*
+
+comp    : NOT comp
+        : math (EE|LT|GT|LTE|GTE) math)*
+
+math    : term ((PLUS|MINUS) term)* 
 
 term    : factor ((MUL|DIV|MOD) factor)*
 
@@ -8,5 +13,5 @@ factor  : (PLUS|MINUS) factor
 
 power   : atom (POW factor)*
 
-atom    : INT|FLOAT|IDENTIFIER \\ highest priority
+atom    : INT | FLOAT | IDENTIFIER | KEYWORD:cierto | KEYWORD:falso | '(' expr ')'
         : LPAREN expr RPAREN

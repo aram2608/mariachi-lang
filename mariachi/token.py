@@ -10,15 +10,16 @@ LETTERS_DIGITS = LETTERS + DIGITS
 
 KEYWORDS = [
     'sea',       # let
-    'fija',      # const
+    'y',         # and -
     'o',         # or
+    'jamas',     # not
+    
+    'fija',      # const
     'si',        # if
     'si no',     # elseif
     'sino',      # else
     'cierto',    # true
     'falso',     # false
-    'jamas',     # not
-    'y',         # and
     'entrega',   # return
     'define',    # define
     'para',      # for
@@ -45,6 +46,12 @@ TT_MOD = 'MOD'
 TT_FLOORDIV = 'FLOORDIV'
 TT_POW = 'POW'
 TT_EQ = 'EQ'
+TT_EE = 'EE'
+TT_NE = 'NE'
+TT_LT = 'LT'
+TT_GT = 'GT'
+TT_LTE = 'LTE'
+TT_GTE = 'GTE'
 TT_LPAREN = 'LPAREN'
 TT_RPAREN = 'RPAREN'
 TT_COMMENT = 'COMMENT'

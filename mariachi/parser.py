@@ -44,6 +44,17 @@ class Parser:
             res.register_advancement()
             self.advance()
             return res.success(VarAccessNode(tok))
+        
+        # Boolean check
+        elif tok.matches(TT_KEYWORD, 'cierto'):
+            res.register_advancement()
+            self.advance()
+            return res.success(NumberNode(Token(TT_INT, 1, tok.pos_start, tok.pos_end)))
+
+        elif tok.matches(TT_KEYWORD, 'falso'):
+            res.register_advancement()
+            self.advance()
+            return res.success(NumberNode(Token(TT_INT, 0, tok.pos_start, tok.pos_end)))
 
         # Parenthesis check
         elif tok.type == TT_LPAREN:
@@ -87,6 +98,30 @@ class Parser:
     def term(self):
         """Creates our terms."""
         return self.binary_operation(self.factor, (TT_DIV, TT_MUL, TT_MOD, TT_FLOORDIV))
+    
+    def arith_expr(self):
+        """Handles arithmetic logic."""
+        return self.binary_operation(self.term, (TT_PLUS, TT_MINUS))
+    
+    def comp_expr(self):
+        """Handles comparison expression."""
+        res = ParseResult()
+        
+        if self.current_tok.matches(TT_KEYWORD, 'jamas'):
+            op_tok = self.current_tok
+            res.register_advancement()
+            self.advance()
+
+            node = res.register(self.comp_expr())
+            if res.error: return res
+            return res.success(UnaryOpNode(op_tok, node))
+        
+        node = res.register(self.binary_operation(self.arith_expr, (TT_EE, TT_NE, TT_LT, TT_LTE, TT_GT, TT_GTE)))
+        if res.error:
+            return res.failure(SintaxisInvalidoError(
+                self.current_tok.pos_start, self.current_tok.pos_end, "int, float, identificador, '+', '-', '(', o 'jamas' esperado"
+                ))
+        return res.success(node)
 
     def expr(self):
         """Creates our expression."""
@@ -129,12 +164,12 @@ class Parser:
             if res.error: return res
             return res.success(VarAssignNode(var_name, expr))
 
-        node = res.register(self.binary_operation(self.term, (TT_PLUS, TT_MINUS)))
+        node = res.register(self.binary_operation(self.comp_expr, ((TT_KEYWORD, "y"), (TT_KEYWORD, 'o'))))
 
         if res.error: 
             return res.failure(
                 SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, 
-                                    "'sea', int, float, identificador, '+', '-', o '(') esperado"))
+                                    "'sea', int, float, identificador, '+', '-', '(', o 'jamas' esperado"))
         return res.success(node)
 
     def binary_operation(self, func_a, ops, func_b=None):
@@ -148,7 +183,7 @@ class Parser:
         if res.error:
             return res
 
-        while self.current_tok.type in ops:
+        while self.current_tok.type in ops or (self.current_tok.type, self.current_tok.value) in ops:
             # We assign the operation tokens
             op_tok = self.current_tok
 
@@ -168,8 +203,8 @@ class Parser:
             left = BinaryOpNode(left, op_tok, right)
         return res.success(left)
 
-global_symbole_table = SymbolTable()
-global_symbole_table.set("nada", Number(0))
+global_symbol_table = SymbolTable()
+global_symbol_table.set("nada", Number(0))
 
 def run(fn, code):
     """The code runner used to parse the code and tokenize inputs."""
@@ -188,6 +223,6 @@ def run(fn, code):
     # Run interpreter
     interpreter = Interpreter()
     context = Context('<programma>')
-    context.symbol_table = global_symbole_table
+    context.symbol_table = global_symbol_table
     result = interpreter.visit(ast.node, context)
     return result.value, result.error

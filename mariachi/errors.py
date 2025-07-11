@@ -27,14 +27,18 @@ class EjecucionError(Error):
         super().__init__(pos_start, pos_end, 'Ejecucion error', details)
         self.context = context
 
+class CaracterEsperadoError(Error):
+    def __init__(self, pos_start, pos_end, details):
+        super().__init__(pos_start, pos_end, 'Caracter esperado', details)
+
     def as_string(self):
         """Custom method to represent errors as strings."""
-        result = self.genereate_traceback()
+        result = self.generate_traceback()
         result += f'{self.error_name}: {self.details}'
         result += '\n' + string_with_arrows(self.pos_start.ftxt, self.pos_start, self.pos_end)
         return result
 
-    def genereate_traceback(self):
+    def generate_traceback(self):
         """Generates a traceback for error handling."""
         result = ''
         pos = self.pos_start

@@ -41,7 +41,7 @@ class Number:
     def power_by(self, other):
         """A function to represent power multiplication."""
         if isinstance(other, Number):
-            return Number(self.value ** other.value).set_context(self.set_context), None
+            return Number(self.value ** other.value).set_context(self.context), None
         
     def modulo_by(self, other):
         """A function to represent modulo operations."""
@@ -61,8 +61,43 @@ class Number:
                     other.pos_start, other.pos_end, 'Division por zero', self.context
                 )
         return Number(self.value // other.value).set_context(self.context), None
+    
+    def get_comparison_eq(self, other):
+        """Handles equals comparisons."""
+        if isinstance(other, Number):
+            return Number(int(self.value == other.value)).set_context(self.context), None
 
+    def get_comparison_lt(self, other):
+        """Less than comparisons."""
+        if isinstance(other, Number):
+            return Number(int(self.value < other.value)).set_context(self.context), None
+
+    def get_comparison_lte(self, other):
+        """Less than or equal to comparisons."""
+        if isinstance(other, Number):
+            return Number(int(self.value <= other.value)).set_context(self.context), None
+
+    def get_comparison_gt(self, other):
+        """Greater than comparisons."""
+        if isinstance(other, Number):
+            return Number(int(self.value > other.value)).set_context(self.context), None
+
+    def get_comparison_gte(self, other):
+        """Greater than or equal to comparisons."""
+        if isinstance(other, Number):
+            return Number(int(self.value >= other.value)).set_context(self.context), None
+
+    def anded_by(self, other):
+        if isinstance(other, Number):
+            return Number(int(self.value and other.value)).set_context(self.context), None
+
+    def ored_by(self, other):
+        if isinstance(other, Number):
+            return Number(int(self.value or other.value)).set_context(self.context), None
         
+    def notted(self):
+        return Number(1 if self.value == 0 else 0).set_context(self.context), None
+
     def copy(self):
         """A function to copy an operations position."""
         copy = Number(self.value)
