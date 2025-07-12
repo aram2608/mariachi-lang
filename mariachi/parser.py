@@ -323,7 +323,7 @@ class Parser:
                 element_nodes.append(res.register(self.expr()))
                 if res.error: return res
 
-            if self.current_tok.type != TT_RPAREN:
+            if self.current_tok.type != TT_RSQUARE:
                 return res.failure(
                         SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, 
                                     "',' o ')' esperado"))

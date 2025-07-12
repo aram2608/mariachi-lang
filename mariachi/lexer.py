@@ -113,8 +113,10 @@ class Lexer:
             # Commas and comments
             elif self.current_char == ',':
                 tokens.append(Token(TT_COMMA, pos_start=self.pos))
+                self.advance()
             elif self.current_char == '#':
                 tokens.append(Token(TT_COMMENT, pos_start=self.pos))
+                self.advance()
             else:
                 pos_start = self.pos.copy()
                 char = self.current_char

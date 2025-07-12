@@ -83,9 +83,6 @@ def test_const_overwrite():
 def test_function_declaration(fresh_table):
     run('programma', "define hola(x) { x + 1 }", fresh_table)
     result, error = run('programma', "hola(2)", fresh_table)
-    print("type(result):", type(result))
-    print("repr(result):", repr(result))
-    print("str(result):", str(result))
     assert result.value == 3
 
 def test_string(fresh_table):
@@ -94,3 +91,11 @@ def test_string(fresh_table):
     result_2 = run_mariachi("x", fresh_table)
     assert result == 'this is a string'
     assert result_2 == 'this is a string'
+
+def test_list_manipulation(fresh_table):
+    result, error = run('programma', '[1,2,3,4] * [1,2,3]', fresh_table)
+    result_2, error = run('programma', '[1,2,3,4] / 0', fresh_table)
+    result_3, error = run('programma', '[1,2,3] + 4', fresh_table)
+    assert result.elements == [1, 2, 3, 4, 1, 2, 3]
+    assert result_2.elements == 1
+    assert result_3.elements == [1, 2, 3, 4]
