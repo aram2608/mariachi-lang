@@ -1,5 +1,7 @@
-sea resultado = 1
-para i = 1 hasta 10 paso 1 pues resultado = resultado * i
+para i = 1 hasta 6 {
+    canta("i es " + i)
+}
 
-sea r = 1
-para i = 5 hasta 0 paso -1 pues sea r = r * i
+para i = 0 hasta 10 paso 2 {
+    canta(i)
+}

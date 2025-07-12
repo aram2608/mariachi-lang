@@ -6,6 +6,7 @@ class ParseResult:
         self.node = None
         self.last_registered_advance_count = 0
         self.advance_count = 0
+        self.to_reverse_count = 0
 
     def register_advancement(self):
         """A function to keep track of advancements."""
@@ -19,6 +20,12 @@ class ParseResult:
         if res.error:
             self.error = res.error
         return res.node
+
+    def try_register(self, res):
+        if res.error:
+            self.to_reverse_count = res.advance_count
+            return None
+        return self.register(res)
 
     def success(self, node):
         """A function to declare succesful parsing."""

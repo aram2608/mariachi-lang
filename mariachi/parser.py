@@ -11,18 +11,27 @@ class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
         self.tok_idx = -1
+        self.repl = False
         self.advance()
 
     def advance(self):
         """Advance through our tokens."""
         self.tok_idx += 1
-        if self.tok_idx < len(self.tokens):
-            self.current_tok = self.tokens[self.tok_idx]
+        self.update_current_tok()
         return self.current_tok
+
+    def reverse(self, amount=1):
+        self.tok_idx -= amount
+        self.update_current_tok()
+        return self.current_tok
+
+    def update_current_tok(self):
+        if self.tok_idx >= 0 and self.tok_idx < len(self.tokens):
+            self.current_tok = self.tokens[self.tok_idx]
 
     def parse(self):
         """Parser function for the grammar rules."""
-        res = self.expr()
+        res = self.statements()
         if not res.error and self.current_tok.type != TT_EOF:
             return res.failure(
                 SintaxisInvalidoError(
@@ -35,9 +44,8 @@ class Parser:
 
     ####################################
 
-    def statements(self):
+    def block(self):
         res = ParseResult()
-        statements = []
 
         if self.current_tok.type != TT_LBRACE:
             return res.failure(
@@ -49,25 +57,59 @@ class Parser:
         res.register_advancement()
         self.advance()
 
-        while self.current_tok.type != TT_RBRACE:
-            stmt = res.register(self.expr())
-            if res.error:
-                return res
-            statements.append(stmt)
+        statements = res.register(self.statements())
+        if res.error:
+            return res
 
-            if self.current_tok.type == TT_EOF:
-                return res.failure(
-                    SintaxisInvalidoError(
-                        self.current_tok.pos_start,
-                        self.current_tok.pos_end,
-                        "'}' esperado",
-                    )
+        if self.current_tok.type != TT_RBRACE:
+            return res.failure(
+                SintaxisInvalidoError(
+                    self.current_tok.pos_start, self.current_tok.pos_end, "'}' esperado"
                 )
+            )
 
         res.register_advancement()
         self.advance()
 
-        return res.success(BlockNode(statements))
+        return res.success(statements)
+
+    def statements(self):
+        res = ParseResult()
+        statements = []
+        pos_start = self.current_tok.pos_start.copy()
+
+        while self.current_tok.type == TT_NEWLINE:
+            res.register_advancement()
+            self.advance()
+
+        stmt = res.register(self.expr())
+        if res.error:
+            return res
+        statements.append(stmt)
+        more_stmts = True
+
+        while True:
+            nl_count = 0
+            while self.current_tok.type == TT_NEWLINE:
+                res.register_advancement()
+                self.advance()
+                nl_count += 1
+
+            if nl_count == 0:
+                more_stmts = False
+
+            if not more_stmts:
+                break
+
+            stmt = res.try_register(self.expr())
+            if not stmt:
+                self.reverse(res.to_reverse_count)
+                more_stmts = False
+                continue
+            statements.append(stmt)
+        return res.success(
+            ListNode(statements, pos_start, self.current_tok.pos_end.copy())
+        )
 
     def expr(self):
         """Creates our expression."""
@@ -415,66 +457,46 @@ class Parser:
                 SintaxisInvalidoError(
                     self.current_tok.pos_start,
                     self.current_tok.pos_end,
-                    f"'si' esperado",
+                    "'si' esperado",
                 )
             )
 
         res.register_advancement()
         self.advance()
 
-        condition = res.register(self.comp_expr())
+        condition = res.register(self.expr())
         if res.error:
             return res
 
-        if not self.current_tok.matches(TT_KEYWORD, "pues"):
-            return res.failure(
-                SintaxisInvalidoError(
-                    self.current_tok.pos_start,
-                    self.current_tok.pos_end,
-                    "'pues' o '{' esperado",
-                )
-            )
-        
-        res.register_advancement()
-        self.advance()
-
-        expr = res.register(self.expr())
+        body = res.register(self.block())
         if res.error:
             return res
-        cases.append((condition, expr))
+
+        cases.append((condition, body))
 
         while self.current_tok.matches(TT_KEYWORD, "quizas"):
             res.register_advancement()
             self.advance()
 
-            condition = res.register(self.comp_expr())
+            condition = res.register(self.expr())
             if res.error:
                 return res
 
-            if not self.current_tok.matches(TT_KEYWORD, "pues"):
-                return res.failure(
-                    SintaxisInvalidoError(
-                        self.current_tok.pos_start,
-                        self.current_tok.pos_end,
-                        "'pues' esperado",
-                    )
-                )
-
-            res.register_advancement()
-            self.advance()
-
-            expr = res.register(self.expr())
+            body = res.register(self.block())
             if res.error:
                 return res
-            cases.append((condition, expr))
+
+            cases.append((condition, body))
 
         if self.current_tok.matches(TT_KEYWORD, "sino"):
             res.register_advancement()
             self.advance()
 
-            else_case = res.register(self.expr())
+            body = res.register(self.block())
             if res.error:
                 return res
+
+            else_case = body
 
         return res.success(IfNode(cases, else_case))
 
@@ -536,33 +558,21 @@ class Parser:
         if res.error:
             return res
 
+        step_value = None
         if self.current_tok.matches(TT_KEYWORD, "paso"):
             res.register_advancement()
             self.advance()
-
             step_value = res.register(self.expr())
             if res.error:
                 return res
-        else:
-            step_value = None
 
-        if not self.current_tok.matches(TT_KEYWORD, "pues"):
-            return res.failure(
-                SintaxisInvalidoError(
-                    self.current_tok.pos_start,
-                    self.current_tok.pos_end,
-                    "'pues' esperado",
-                )
-            )
-
-        res.register_advancement()
-        self.advance()
-
-        body = res.register(self.expr())
+        body = res.register(self.block())
         if res.error:
             return res
 
-        return res.success(ForNode(var_name, start_value, end_value, step_value, body))
+        return res.success(
+            ForNode(var_name, start_value, end_value, step_value, body, True)
+        )
 
     def while_expr(self):
         res = ParseResult()
@@ -583,22 +593,11 @@ class Parser:
         if res.error:
             return res
 
-        if not self.current_tok.matches(TT_KEYWORD, "pues"):
-            return res.failure(
-                SintaxisInvalidoError(
-                    self.current_tok.pos_start,
-                    self.current_tok.pos_end,
-                    "'pues' esperado",
-                )
-            )
-
-        res.register_advancement()
-        self.advance()
-
-        body = res.register(self.expr())
+        body = res.register(self.block())
         if res.error:
             return res
-        return res.success(WhileNode(condition, body))
+
+        return res.success(WhileNode(condition, body, True))
 
     def func_def(self):
         """Defines functions."""
@@ -688,30 +687,14 @@ class Parser:
         res.register_advancement()
         self.advance()
 
-        if self.current_tok.type != TT_LBRACE:
-            return res.failure(
-                SintaxisInvalidoError(
-                    self.current_tok.pos_start, self.current_tok.pos_end, "'{' esperado"
-                )
-            )
-
-        res.register_advancement()
-        self.advance()
-        node_to_return = res.register(self.expr())
+        body = res.register(self.block())
         if res.error:
             return res
 
-        if self.current_tok.type != TT_RBRACE:
-            return res.failure(
-                SintaxisInvalidoError(
-                    self.current_tok.pos_start, self.current_tok.pos_end, "'}' esperado"
-                )
-            )
-
         res.register_advancement()
         self.advance()
 
-        return res.success(FuncDefNode(var_name_tok, arg_name_toks, node_to_return))
+        return res.success(FuncDefNode(var_name_tok, arg_name_toks, body, True))
 
     def binary_operation(self, func_a, ops, func_b=None):
         """Refactored logic for handling operators."""

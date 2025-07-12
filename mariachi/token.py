@@ -23,6 +23,7 @@ KEYWORDS = [
     "hasta",  # to
     "paso",  # step
     "define",  # define functions
+    "fin",
 ]
 
 #################################

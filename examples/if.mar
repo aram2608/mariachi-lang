@@ -1,0 +1,7 @@
+si x > 10 {
+    canta("Grande")
+} quizas x > 5 {
+    canta("Mediano")
+} sino {
+    canta("Pequeño")
+}

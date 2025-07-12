@@ -6,10 +6,10 @@ import math
 def run_mariachi(code, symbol_table):
     value, error = run("<test>", code, symbol_table=symbol_table)
     assert error is None
-    return value.value if value else None
+    return value.elements if value else None
 
 def test_addition(fresh_table):
-    assert run_mariachi("1 + 2", fresh_table) == 3
+    assert run_mariachi("1 + 2", fresh_table) == [3]
 
 def test_subtraction(fresh_table):
     assert run_mariachi("5 - 3", fresh_table) == 2
