@@ -15,7 +15,7 @@ power   : call (POW factor)*
 
 call    : atom (LPAREN (expr (COMMA expr)*)? RPAREN)?
 
-atom    : INT | FLOAT | IDENTIFIER | KEYWORD:cierto | KEYWORD:falso | KEYWORD:nada | STRING | KEYWORD:dame | KEYWORD:borra | KEYWORD:pon | KEYWORD:trenza
+atom    : INT | FLOAT | IDENTIFIER | KEYWORD:cierto | KEYWORD:falso | KEYWORD:nada | STRING
         : LPAREN expr RPAREN
         : if
         : while
@@ -36,7 +36,5 @@ define  : KEYWORD:define IDENTIFIER?
         : LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN
         : ARROW expr
         : LBRACE expr RBRACE
-
-stat    : KEYWORD:si expr LBRACE expr RBRACE
 
 list    : LSQUARE (expr (COMMA expr)*)? RSQUARE

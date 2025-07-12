@@ -1,6 +1,6 @@
 # tests/test_core.py
 
-from mariachi.mariachi import run, SymbolTable, Context, Number, Function
+from mariachi.mariachi import run, SymbolTable, Context, Number
 import math
 
 def run_mariachi(code, symbol_table):
@@ -58,8 +58,8 @@ def test_variable_access(fresh_table):
     assert run_mariachi("x", fresh_table) == 7
 
 def test_loop_for(fresh_table):
-    run_mariachi("sea r = 1", fresh_table)
-    run_mariachi("para i = 1 hasta 6 pues sea r = r * i", fresh_table)
+    run('programma',"sea r = 1", fresh_table)
+    run('programma',"para i = 1 hasta 6 pues sea r = r * i", fresh_table)
     assert run_mariachi("r", fresh_table) == 120
 
 def test_constants(fresh_table):

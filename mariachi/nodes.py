@@ -56,15 +56,6 @@ class VarAccessNode:
 
         self.pos_start = self.var_name_tok.pos_start
         self.pos_end = self.var_name_tok.pos_end
-
-class PrintNode:
-    def __init__(self, expr_node):
-        self.expr_node = expr_node
-        self.pos_start = expr_node.pos_start
-        self.pos_end = expr_node.pos_end
-
-    def __repr__(self):
-        return f'(canta {self.expr_node})'
     
 class IfNode:
     def __init__(self, cases, else_case):
@@ -73,15 +64,6 @@ class IfNode:
 
         self.pos_start = self.cases[0][0].pos_start
         self.pos_end = (self.else_case or self.cases[len(self.cases) - 1][0]).pos_end
-
-class BlockNode:
-    def __init__(self, statements):
-        self.statements = statements
-        self.pos_start = statements[0].pos_start if statements else None
-        self.pos_end = statements[-1].pos_end if statements else None
-
-    def __repr__(self):
-        return f'(bloque {self.statements})'
     
 class ForNode:
     def __init__(self, var_name_tok, start_value_node, end_value_node, step_value_node, body_node):
@@ -150,7 +132,11 @@ class ListNode:
         self.pos_start = pos_start
         self.pos_end = pos_end
 
-class ConcatNode:
-    def __init__(self, left_node, right_node):
-        self.left_node = left_node
-        self.right_node = right_node
+class BlockNode:
+    def __init__(self, statements):
+        self.statements = statements
+        self.pos_start = statements[0].pos_start if statements else None
+        self.pos_end = statements[-1].pos_end if statements else None
+
+    def __repr__(self):
+        return f'(bloque {self.statements})'

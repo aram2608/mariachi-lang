@@ -129,13 +129,17 @@ class Interpreter:
                 node.pos_start, node.pos_end, f"'{var_name}' no es definido", context))
         value = value.copy().set_position(node.pos_start, node.pos_end)
         return res.success(value)
-    
-    def visit_PrintNode(self, node, context):
+
+    def visit_BlockNode(self, node, context):
         res = RTResult()
-        value = res.register(self.visit(node.expr_node, context))
-        if res.error: return res
-        print(value)
-        return res.success(Number(0))
+        result = None
+
+        for statement in node.statements:
+            result = res.register(self.visit(statement, context))
+            if res.error: return res
+
+        # Return last statement's result
+        return res.success(result or None)
     
     def visit_IfNode(self, node, context):
         res = RTResult()
@@ -155,17 +159,6 @@ class Interpreter:
             return res.success(result)
 
         return res.success(None)
-
-    def visit_BlockNode(self, node, context):
-        res = RTResult()
-        result = None
-
-        for statement in node.statements:
-            result = res.register(self.visit(statement, context))
-            if res.error: return res
-
-        # Return last statement's result
-        return res.success(result or None)
     
     def visit_ForNode(self, node, context):
         res = RTResult()
@@ -237,7 +230,7 @@ class Interpreter:
             args.append(res.register(self.visit(arg_node, context)))
             if res.error: return res
 
-        return_value = res.register(value_to_call.execute(args))
+        return_value = res.register(value_to_call.execute(args, context))
         if res.error: return res
         return res.success(return_value)
     
@@ -246,7 +239,7 @@ class Interpreter:
             String(node.tok.value).with_meta(context, node.pos_start, node.pos_end))
     
     def visit_ListNode(self, node, context):
-        res = ParseResult()
+        res = RTResult()
         elements = []
 
         for element_node in node.element_nodes:
@@ -254,19 +247,7 @@ class Interpreter:
             if res.error: return res
 
         return res.success(
-            List(elements).with_meta(context, pos_start=node.pos_start, pos_end=node.pos_end))
-    
-    def visit_ConcatNode(self, node, context):
-        res = ParseResult()
-        left = self.visit(node.left_node)
-        right = self.visit(node.right_node)
-
-        # Handle string or list concatenation
-        if isinstance(left, str) and isinstance(right, str):
-            pass
-        else:
-            return res.failure(EjecucionError(
-                node.pos_start, node.pos_end, f"'No se puede trenzar: {type(left)} y {type(right)}", context))
+            List(elements).with_meta(context, node.pos_start, node.pos_end))
 
 class SymbolTable:
     def __init__(self, parent=None):
@@ -382,12 +363,12 @@ class Function(Value):
 		self.body_node = body_node
 		self.arg_names = arg_names
 
-	def execute(self, args):
+	def execute(self, args, context):
 
 		res = RTResult()
 		interpreter = Interpreter()
 
-		new_context = Context(self.name, self.context, self.pos_start)
+		new_context = Context(self.name, context, self.pos_start)
 		new_context.symbol_table = SymbolTable(new_context.parent.symbol_table)
 
 		if len(args) > len(self.arg_names):
@@ -596,12 +577,12 @@ class List(Value):
         super().__init__()
         self.elements = elements
 
-    def add_item(self, other):
+    def added_to(self, other):
         new_list = self.copy()
         new_list.elements.append(other)
         return new_list, None
     
-    def concat_list(self, other):
+    def multed_by(self, other):
         if isinstance(other, List):
             new_list = self.copy()
             new_list.elements.extend(other.elements)
@@ -609,7 +590,7 @@ class List(Value):
         else:
             return None, self.illegal_operation(self, other)
         
-    def remove_item(self, other):
+    def subbed_by(self, other):
         if isinstance(other, Number):
             new_list = self.copy()
             try:
@@ -621,7 +602,7 @@ class List(Value):
         else:
             return None, self.illegal_operation(self, other)
         
-    def get_item(self, other):
+    def divided_by(self, other):
         if isinstance(other, Number):
             try:
                 return self.elements[other.value], None
@@ -633,7 +614,7 @@ class List(Value):
         
     def copy(self):
         copy = List(self.elements[:])
-        copy.set_pos(self.pos_start, self.pos_end)
+        copy.set_position(self.pos_start, self.pos_end)
         copy.set_context(self.context)
         return copy
     

@@ -3,14 +3,17 @@ class ParseResult:
     def __init__(self):
         self.error = None
         self.node = None
+        self.last_registered_advance_count = 0
         self.advance_count = 0
 
     def register_advancement(self):
         """A function to keep track of advancements."""
+        self.last_registered_advance_count = 1
         self.advance_count += 1
 
     def register(self, res):
         """A function to pass parse results."""
+        self.last_registered_advance_count = res.advance_count
         self.advance_count += res.advance_count
         if res.error:
             self.error = res.error
