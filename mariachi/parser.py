@@ -232,23 +232,6 @@ class Parser:
             list_expr = res.register(self.list_expr())
             if res.error: return res
             return res.success(list_expr)
-        
-        # Boolean check
-        elif tok.matches(TT_KEYWORD, 'cierto'):
-            res.register_advancement()
-            self.advance()
-            return res.success(NumberNode(Token(TT_INT, 1, tok.pos_start, tok.pos_end)))
-
-        elif tok.matches(TT_KEYWORD, 'falso'):
-            res.register_advancement()
-            self.advance()
-            return res.success(NumberNode(Token(TT_INT, 0, tok.pos_start, tok.pos_end)))
-        
-        # Null check
-        elif tok.matches(TT_KEYWORD, 'nada'):
-            res.register_advancement()
-            self.advance()
-            return res.success(NumberNode(Token(TT_INT, 0, tok.pos_start, tok.pos_end)))
 
         # Parenthesis check
         elif tok.type == TT_LPAREN:

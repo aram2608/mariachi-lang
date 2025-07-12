@@ -14,9 +14,6 @@ KEYWORDS = [
     'y',         # and
     'o',         # or
     'jamas',     # not
-    'cierto',    # true
-    'nada',      # null or 0
-    'falso',     # false
     'si',        # if
     'pues',      # then
     'quizas',    # elseif

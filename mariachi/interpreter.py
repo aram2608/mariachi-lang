@@ -230,7 +230,7 @@ class Interpreter:
             args.append(res.register(self.visit(arg_node, context)))
             if res.error: return res
 
-        return_value = res.register(value_to_call.execute(args, context))
+        return_value = res.register(value_to_call.execute(args))
         if res.error: return res
         return res.success(return_value)
     
@@ -356,46 +356,65 @@ class Value:
             self.context
         )
     
-class Function(Value):
+class BaseFunction(Value):
+    def __init__(self, name):
+        super().__init__()
+        self.name = name or "<anonimo>"
+
+    def generate_new_context(self):
+        new_context = Context(self.name, self.context, self.pos_start)
+        new_context.symbol_table = SymbolTable(new_context.parent.symbol_table)
+        return new_context
+    
+    def check_args(self, arg_names, args):
+        res = RTResult()
+
+        if len(args) > len(arg_names):
+            return res.failure(EjecucionError(
+				self.pos_start, self.pos_end,
+				f"{len(args) - len(arg_names)} demasiados argumentos pasados a '{self.name}'",
+				self.context
+			))
+
+        if len(args) < len(arg_names):
+            return res.failure(EjecucionError(
+				self.pos_start, self.pos_end,
+				f"{len(arg_names) - len(args)} no suficiente argumentos pasados a '{self.name}'",
+				self.context
+			))
+        return res.success(None)
+    
+    def populate_args(self, arg_names, args, exec_ctx):
+        for i in range(len(args)):
+            arg_name = arg_names[i]
+            arg_value = args[i]
+            arg_value.set_context(exec_ctx)
+            exec_ctx.symbol_table.set(arg_name, arg_value)
+
+    def check_and_populate_args(self, arg_names, args, exec_ctx):
+        res = RTResult()
+        res.register(self.check_args(arg_names, args))
+        if res.error: return res
+        self.populate_args(arg_names, args, exec_ctx)
+        return res.success(None)
+
+class Function(BaseFunction):
 	def __init__(self, name, body_node, arg_names):
-		super().__init__()
-		self.name = name or "<anonimo>"
+		super().__init__(name)
 		self.body_node = body_node
 		self.arg_names = arg_names
 
-	def execute(self, args, context):
-
+	def execute(self, args):
 		res = RTResult()
 		interpreter = Interpreter()
+		exec_ctx = self.generate_new_context()
+        
+        res.register(self.check_and_populate_args(self.arg_names, args, exec_ctx))
+        if res.error: return res
 
-		new_context = Context(self.name, context, self.pos_start)
-		new_context.symbol_table = SymbolTable(new_context.parent.symbol_table)
-
-		if len(args) > len(self.arg_names):
-			return res.failure(EjecucionError(
-				self.pos_start, self.pos_end,
-				f"{len(args) - len(self.arg_names)} demasiados argumentos pasados a '{self.name}'",
-				self.context
-			))
-
-		if len(args) < len(self.arg_names):
-			return res.failure(EjecucionError(
-				self.pos_start, self.pos_end,
-				f"{len(self.arg_names) - len(args)} no suficiente argumentos pasados a '{self.name}'",
-				self.context
-			))
-
-		for i in range(len(args)):
-			arg_name = self.arg_names[i]
-			arg_value = args[i]
-			arg_value.set_context(new_context)
-			new_context.symbol_table.set(arg_name, arg_value)
-
-		value = res.register(interpreter.visit(self.body_node, new_context))
-		if res.error:
-			return res
-
-		return res.success(value)
+        value = res.register(interpreter.visit(self.body_node, exec_ctx))
+        if res.error: return
+        return None
 
 	def copy(self):
 		copy = Function(self.name, self.body_node, self.arg_names)
@@ -405,6 +424,46 @@ class Function(Value):
 
 	def __repr__(self):
 		return f"<funcion {self.name}>"
+
+class BuiltInFunction(BaseFunction):
+    def __init__(self, name):
+        super().__init__(name)
+
+        def execute(self, args):
+            res = RTResult()
+            exec_ctx = self.generate_new_context()
+
+            method_name = f'ejecutar_{self.name}'
+            method = getattr(self, method_name, self.no_visit_method)
+
+            res.register(self.check_and_populate_args(method.arg_names, args, exec_ctx))
+            if res.error: return
+
+            return_value = res.register(method(exec_ctx))
+            if res.error: return res
+            return res.success(return_value)
+        
+        def copy(self):
+            copy = BuiltInFunction(self.name)
+            copy.set_context(self.context)
+            copy.set_position(self.pos_start, self.pos_end)
+            return copy
+
+        def __repr__(self):
+            return f"<built-in function {self.name}>"
+
+        def execute_print(self, exec_ctx):
+            print(str(exec_ctx.symbol_table.get('value'))
+            return RTResult().success(Number.null)
+        execute_print.arg_names = ['value']
+
+        def execute_print_ret(self, exec_ctx):
+            return RTResult().success(String(str(exec_ctx.symbol_table.get('value'))))
+        execute_print_ret.arg_names = ['value']
+
+        def execute_input(self, exec_ctx):
+            text = input()
+            return RTResult.success(String(text))
 
 class Number(Value):
     """Class for defining arithmetic logic."""
@@ -544,6 +603,10 @@ class Number(Value):
         
     def __repr__(self):
         return str(self.value)
+    
+Number.null = Number(0)
+Number.true = Number(1)
+Number.false = Number(0)
     
 class String(Value):
     def __init__(self, value):

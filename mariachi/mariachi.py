@@ -3,6 +3,9 @@ from .lexer import *
 from .parser import *
 
 global_symbol_table = SymbolTable()
+global_symbol_table.set('nada', Number.null)
+global_symbol_table.set('cierto', Number.true)
+global_symbol_table.set('falso', Number.false)
 
 def run(fn, code, symbol_table=None):
     """The code runner used to parse the code and tokenize inputs."""
