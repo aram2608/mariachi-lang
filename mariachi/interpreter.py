@@ -293,10 +293,20 @@ class Interpreter:
             elements.append(res.register(self.visit(element_node, context)))
             if res.error:
                 return res
-
         return res.success(
             List(elements).with_meta(context, node.pos_start, node.pos_end)
         )
+
+    def visit_BlockNode(self, node, context):
+        res = RTResult()
+        result = None
+
+        for statement in node.statement_nodes.element_nodes:
+            result = res.register(self.visit(statement, context))
+            if res.error:
+                return res
+
+        return res.success(result or Number.null)
 
 
 class SymbolTable:

@@ -46,6 +46,7 @@ class Parser:
 
     def block(self):
         res = ParseResult()
+        pos_start = self.current_tok.pos_start.copy()
 
         if self.current_tok.type != TT_LBRACE:
             return res.failure(
@@ -71,7 +72,7 @@ class Parser:
         res.register_advancement()
         self.advance()
 
-        return res.success(statements)
+        return res.success(BlockNode(statements, pos_start, self.current_tok.pos_end))
 
     def statements(self):
         res = ParseResult()
@@ -692,9 +693,10 @@ class Parser:
             return res
 
         res.register_advancement()
-        self.advance()
+        if res.error:
+            return res
 
-        return res.success(FuncDefNode(var_name_tok, arg_name_toks, body, True))
+        return res.success(FuncDefNode(var_name_tok, arg_name_toks, body, False))
 
     def binary_operation(self, func_a, ops, func_b=None):
         """Refactored logic for handling operators."""
