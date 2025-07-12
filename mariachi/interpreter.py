@@ -438,7 +438,7 @@ class BuiltInFunction(BaseFunction):
         res = RTResult()
         exec_ctx = self.generate_new_context()
 
-        method_name = f'ejecutar_{self.name}'
+        method_name = f'execute_{self.name}'
         method = getattr(self, method_name, self.no_visit_method)
 
         res.register(self.check_and_populate_args(method.arg_names, args, exec_ctx))
@@ -447,6 +447,9 @@ class BuiltInFunction(BaseFunction):
         return_value = res.register(method(exec_ctx))
         if res.error: return res
         return res.success(return_value)
+    
+    def no_visit_method(self, node, context):
+        raise Exception(f"execute_{self.name} function not defined.")
         
     def copy(self):
         copy = BuiltInFunction(self.name)
@@ -457,10 +460,10 @@ class BuiltInFunction(BaseFunction):
     def __repr__(self):
         return f"<built-in function {self.name}>"
 
-    def execute_print(self, exec_ctx):
+    def execute_canta(self, exec_ctx):
         print(str(exec_ctx.symbol_table.get('value')))
         return RTResult().success(Number.null)
-    execute_print.arg_names = ['value']
+    execute_canta.arg_names = ['value']
 
     def execute_print_ret(self, exec_ctx):
         return RTResult().success(String(str(exec_ctx.symbol_table.get('value'))))
@@ -574,18 +577,18 @@ class BuiltInFunction(BaseFunction):
         return RTResult().success(Number.null)
     execute_extend.arg_names = ["listA", "listB"]
 
-BuiltInFunction.print       = BuiltInFunction("canta")
-BuiltInFunction.print_ret   = BuiltInFunction("print_ret")
-BuiltInFunction.input       = BuiltInFunction("input")
-BuiltInFunction.input_int   = BuiltInFunction("input_int")
-BuiltInFunction.clear       = BuiltInFunction("clear")
-BuiltInFunction.is_number   = BuiltInFunction("is_number")
-BuiltInFunction.is_string   = BuiltInFunction("is_string")
-BuiltInFunction.is_list     = BuiltInFunction("is_list")
-BuiltInFunction.is_function = BuiltInFunction("is_function")
-BuiltInFunction.append      = BuiltInFunction("append")
-BuiltInFunction.pop         = BuiltInFunction("pop")
-BuiltInFunction.extend      = BuiltInFunction("extend")
+BuiltInFunction.canta       = BuiltInFunction("canta")
+BuiltInFunction.eco         = BuiltInFunction("eco")
+BuiltInFunction.escucha     = BuiltInFunction("escucha")
+BuiltInFunction.escucha_num = BuiltInFunction("escucha_num")
+BuiltInFunction.limpia      = BuiltInFunction("limpia")
+BuiltInFunction.es_num      = BuiltInFunction("es_num")
+BuiltInFunction.es_texto    = BuiltInFunction("es_texto")
+BuiltInFunction.es_lista    = BuiltInFunction("es_lista")
+BuiltInFunction.es_funcion  = BuiltInFunction("es_funcion")
+BuiltInFunction.añade       = BuiltInFunction("añade")
+BuiltInFunction.quita       = BuiltInFunction("quita")
+BuiltInFunction.extiende    = BuiltInFunction("extiende")
 
 class Number(Value):
     """Class for defining arithmetic logic."""
