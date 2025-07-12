@@ -3,23 +3,26 @@ class StringNode:
         self.tok = tok
         self.pos_start = self.tok.pos_start
         self.pos_end = self.tok.pos_end
-    
+
     def __repr__(self):
         """A custom representation method for our number node."""
-        return f'{self.tok}'
+        return f"{self.tok}"
+
 
 class NumberNode:
     def __init__(self, tok):
         self.tok = tok
         self.pos_start = self.tok.pos_start
         self.pos_end = self.tok.pos_end
-    
+
     def __repr__(self):
         """A custom representation method for our number node."""
-        return f'{self.tok}'
-    
+        return f"{self.tok}"
+
+
 class BinaryOpNode:
     """Node class for binary operations."""
+
     def __init__(self, left_node, op_tok, right_node):
         self.left_node = left_node
         self.op_tok = op_tok
@@ -28,10 +31,12 @@ class BinaryOpNode:
         self.pos_end = self.right_node.pos_end
 
     def __repr__(self):
-        return f'({self.left_node}, {self.op_tok}, {self.right_node})'
-    
+        return f"({self.left_node}, {self.op_tok}, {self.right_node})"
+
+
 class UnaryOpNode:
     """Node class for unary operations."""
+
     def __init__(self, op_tok, node):
         self.op_tok = op_tok
         self.node = node
@@ -40,8 +45,9 @@ class UnaryOpNode:
 
     def __repr__(self):
         """Custom representation method."""
-        return f'({self.op_tok}, {self.node})'
-    
+        return f"({self.op_tok}, {self.node})"
+
+
 class VarAssignNode:
     def __init__(self, var_name_tok, value_node):
         self.var_name_tok = var_name_tok
@@ -50,13 +56,15 @@ class VarAssignNode:
         self.pos_start = self.var_name_tok.pos_start
         self.pos_end = self.value_node.pos_end
 
+
 class VarAccessNode:
     def __init__(self, var_name_tok):
         self.var_name_tok = var_name_tok
 
         self.pos_start = self.var_name_tok.pos_start
         self.pos_end = self.var_name_tok.pos_end
-    
+
+
 class IfNode:
     def __init__(self, cases, else_case):
         self.cases = cases
@@ -64,9 +72,12 @@ class IfNode:
 
         self.pos_start = self.cases[0][0].pos_start
         self.pos_end = (self.else_case or self.cases[len(self.cases) - 1][0]).pos_end
-    
+
+
 class ForNode:
-    def __init__(self, var_name_tok, start_value_node, end_value_node, step_value_node, body_node):
+    def __init__(
+        self, var_name_tok, start_value_node, end_value_node, step_value_node, body_node
+    ):
         self.var_name_tok = var_name_tok
         self.start_value_node = start_value_node
         self.end_value_node = end_value_node
@@ -76,6 +87,7 @@ class ForNode:
         self.pos_start = self.var_name_tok.pos_start
         self.pos_end = self.body_node.pos_end
 
+
 class WhileNode:
     def __init__(self, condition_node, body_node):
         self.condition_node = condition_node
@@ -83,6 +95,7 @@ class WhileNode:
 
         self.pos_start = self.condition_node.pos_start
         self.pos_end = self.body_node.pos_end
+
 
 class ConstAssignNode:
     def __init__(self, const_name_tok, value_node):
@@ -92,12 +105,14 @@ class ConstAssignNode:
         self.pos_start = self.const_name_tok.pos_start
         self.pos_end = self.value_node.pos_end
 
+
 class ConstAccessNode:
     def __init__(self, var_name_tok):
         self.var_name_tok = var_name_tok
 
         self.pos_start = self.var_name_tok.pos_start
         self.pos_end = self.var_name_tok.pos_end
+
 
 class FuncDefNode:
     def __init__(self, var_name_tok, arg_name_toks, body_node):
@@ -114,6 +129,7 @@ class FuncDefNode:
 
         self.pos_end = self.body_node.pos_end
 
+
 class CallNode:
     def __init__(self, node_to_call, arg_nodes):
         self.node_to_call = node_to_call
@@ -126,11 +142,13 @@ class CallNode:
         else:
             self.pos_end = self.node_to_call.pos_end
 
+
 class ListNode:
     def __init__(self, element_nodes, pos_start, pos_end):
         self.element_nodes = element_nodes
         self.pos_start = pos_start
         self.pos_end = pos_end
+
 
 class BlockNode:
     def __init__(self, statements):
@@ -139,4 +157,4 @@ class BlockNode:
         self.pos_end = statements[-1].pos_end if statements else None
 
     def __repr__(self):
-        return f'(bloque {self.statements})'
+        return f"(bloque {self.statements})"

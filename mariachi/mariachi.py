@@ -3,9 +3,10 @@ from .lexer import *
 from .parser import *
 
 global_symbol_table = SymbolTable()
-global_symbol_table.set('nada', Number.null)
-global_symbol_table.set('cierto', Number.true)
-global_symbol_table.set('falso', Number.false)
+global_symbol_table.set("nada", Number.null)
+global_symbol_table.set("cierto", Number.true)
+global_symbol_table.set("falso", Number.false)
+
 
 def run(fn, code, symbol_table=None):
     """The code runner used to parse the code and tokenize inputs."""
@@ -20,10 +21,10 @@ def run(fn, code, symbol_table=None):
     ast = parser.parse()
     if ast.error:
         return None, ast.error
-    
+
     # Run interpreter
     interpreter = Interpreter()
-    context = Context('<programma>')
+    context = Context("<programma>")
 
     context.symbol_table = global_symbol_table
     result = interpreter.visit(ast.node, context)

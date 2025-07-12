@@ -1,5 +1,6 @@
 class Error:
     """The custom error classes of the Mariachi Lang."""
+
     def __init__(self, pos_start, pos_end, error_name, details):
         self.pos_start = pos_start
         self.pos_end = pos_end
@@ -8,58 +9,70 @@ class Error:
 
     def as_string(self):
         """Converts our error type into a string with provided details."""
-        result = f'{self.error_name}: {self.details}'
-        result += f'\nFile {self.pos_start.fn}, line {self.pos_end.ln} + 1'
-        result += '\n' + string_with_arrows(self.pos_start.ftxt, self.pos_start, self.pos_end)
+        result = f"{self.error_name}: {self.details}"
+        result += f"\nFile {self.pos_start.fn}, line {self.pos_end.ln} + 1"
+        result += "\n" + string_with_arrows(
+            self.pos_start.ftxt, self.pos_start, self.pos_end
+        )
         return result
-    
+
+
 class InesperadoError(Error):
     def __init__(self, pos_start, pos_end, details):
         """Subclass for unexpected character inputs."""
-        super().__init__(pos_start, pos_end, 'Caracter Inesperado', details)
+        super().__init__(pos_start, pos_end, "Caracter Inesperado", details)
+
 
 class SintaxisInvalidoError(Error):
-    def __init__(self, pos_start, pos_end, details=''):
-        super().__init__(pos_start, pos_end, 'Sintaxis Invalido', details)
+    def __init__(self, pos_start, pos_end, details=""):
+        super().__init__(pos_start, pos_end, "Sintaxis Invalido", details)
+
 
 class CaracterEsperadoError(Error):
     def __init__(self, pos_start, pos_end, details):
-        super().__init__(pos_start, pos_end, 'Caracter esperado', details)
+        super().__init__(pos_start, pos_end, "Caracter esperado", details)
+
 
 class EjecucionError(Error):
     def __init__(self, pos_start, pos_end, details, context):
-        super().__init__(pos_start, pos_end, 'Ejecucion error', details)
+        super().__init__(pos_start, pos_end, "Ejecucion error", details)
         self.context = context
 
     def as_string(self):
-        result  = self.generate_traceback()
-        result += f'{self.error_name}: {self.details}'
-        result += '\n' + string_with_arrows(self.pos_start.ftxt, self.pos_start, self.pos_end)
+        result = self.generate_traceback()
+        result += f"{self.error_name}: {self.details}"
+        result += "\n" + string_with_arrows(
+            self.pos_start.ftxt, self.pos_start, self.pos_end
+        )
         return result
-    
+
     def generate_traceback(self):
         """Generates a traceback for error handling."""
-        result = ''
+        result = ""
         pos = self.pos_start
         ctx = self.context
 
         while ctx:
-            result = f' Archivo {pos.fn}, linea {str(pos.ln + 1)}, en {ctx.display_name}\n' + result
+            result = (
+                f" Archivo {pos.fn}, linea {str(pos.ln + 1)}, en {ctx.display_name}\n"
+                + result
+            )
             pos = ctx.parent_entry_pos
             ctx = ctx.parent
-        return 'Retrazo (funcion mas reciente):\n' + result
+        return "Retrazo (funcion mas reciente):\n" + result
+
 
 def string_with_arrows(code, pos_start, pos_end):
     """Adds arrows to point to where the error occured."""
     YELLOW = "\033[93m"
-    BOLD = '\033[1m'
-    RESET = '\033[0m'
+    BOLD = "\033[1m"
+    RESET = "\033[0m"
     # Holds our final result
-    result = ''
+    result = ""
 
     # Calculates indices
-    idx_start = max(code.rfind('\n', 0, pos_start.idx), 0)
-    idx_end = code.find('\n', idx_start + 1)
+    idx_start = max(code.rfind("\n", 0, pos_start.idx), 0)
+    idx_end = code.find("\n", idx_start + 1)
     if idx_end < 0:
         idx_end = len(code)
 
@@ -73,10 +86,11 @@ def string_with_arrows(code, pos_start, pos_end):
         # Append to result
         num_arrows = max(1, col_end - col_start)
         result += f"{BOLD}{line}{RESET}\n"
-        result += ' ' * col_start + f"{YELLOW}{'^' * num_arrows}{RESET}"
+        result += " " * col_start + f"{YELLOW}{'^' * num_arrows}{RESET}"
 
         # Recalculate indices
         idx_start = idx_end
-        idx_end = code.find('\n', idx_start + 1)
-        if idx_end < 0: idx_end = len(code)
-    return result.replace('\t', '')
+        idx_end = code.find("\n", idx_start + 1)
+        if idx_end < 0:
+            idx_end = len(code)
+    return result.replace("\t", "")

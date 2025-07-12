@@ -4,8 +4,10 @@ from .token import *
 from .interpreter import *
 from .context import *
 
+
 class Parser:
     """The parser class for our language."""
+
     def __init__(self, tokens):
         self.tokens = tokens
         self.tok_idx = -1
@@ -23,51 +25,70 @@ class Parser:
         res = self.expr()
         if not res.error and self.current_tok.type != TT_EOF:
             return res.failure(
-                SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, 
-                "'+', '-', '*', '/', '^', '==', '!=', '<', '>', <=', '>=', 'y' or 'o' esperado")
+                SintaxisInvalidoError(
+                    self.current_tok.pos_start,
+                    self.current_tok.pos_end,
+                    "'+', '-', '*', '/', '^', '==', '!=', '<', '>', <=', '>=', 'y' or 'o' esperado",
                 )
+            )
         return res
 
-####################################
-    
+    ####################################
+
     def expr(self):
         """Creates our expression."""
         res = ParseResult()
-        
+
         # Assigning constants
-        if self.current_tok.matches(TT_KEYWORD, 'fija'):
+        if self.current_tok.matches(TT_KEYWORD, "fija"):
             res.register_advancement()
             self.advance()
 
             if self.current_tok.type != TT_IDENTIFIER:
-                return res.failure(SintaxisInvalidoError(
-                    self.current_tok.pos_start, self.current_tok.pos_end, "Identificador esperado"))
+                return res.failure(
+                    SintaxisInvalidoError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "Identificador esperado",
+                    )
+                )
 
             const_name = self.current_tok
             res.register_advancement()
             self.advance()
 
             if self.current_tok.type != TT_EQ:
-                return res.failure(SintaxisInvalidoError(
-                    self.current_tok.pos_start, self.current_tok.pos_end, "'=' esperado"))
+                return res.failure(
+                    SintaxisInvalidoError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "'=' esperado",
+                    )
+                )
 
             res.register_advancement()
             self.advance()
 
             value = res.register(self.expr())
-            if res.error: return res
+            if res.error:
+                return res
             return res.success(ConstAssignNode(const_name, value))
 
         # Assigning variables
-        if self.current_tok.matches(TT_KEYWORD, 'sea'):
+        if self.current_tok.matches(TT_KEYWORD, "sea"):
             res.register_advancement()
             self.advance()
-            
+
             # Check to make sure following token is an indentifier
             if self.current_tok.type != TT_IDENTIFIER:
-                return res.failure(SintaxisInvalidoError(
-                    self.current_tok.pos_start, self.current_tok.pos_end, 'Identificador esperado'))
-            
+                return res.failure(
+                    SintaxisInvalidoError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "Identificador esperado",
+                    )
+                )
+
             # Assigns the variable name
             var_name = self.current_tok
             res.register_advancement()
@@ -75,42 +96,65 @@ class Parser:
 
             # Check to ensure that following a var name is an =
             if self.current_tok.type != TT_EQ:
-                return res.failure(SintaxisInvalidoError(
-                    self.current_tok.pos_start, self.current_tok.pos_end, "'=' esperado"))
-            
+                return res.failure(
+                    SintaxisInvalidoError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "'=' esperado",
+                    )
+                )
+
             # Assign a new expression to the created variable
             res.register_advancement()
             self.advance()
             expr = res.register(self.expr())
-            if res.error: return res
+            if res.error:
+                return res
             return res.success(VarAssignNode(var_name, expr))
 
-        node = res.register(self.binary_operation(self.comp_expr, ((TT_KEYWORD, "y"), (TT_KEYWORD, 'o'))))
+        node = res.register(
+            self.binary_operation(
+                self.comp_expr, ((TT_KEYWORD, "y"), (TT_KEYWORD, "o"))
+            )
+        )
 
-        if res.error: 
+        if res.error:
             return res.failure(
-                SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, 
-                                    "'sea', int, float, identificador, '+', '-', '(', '[', o 'jamas' esperado"))
+                SintaxisInvalidoError(
+                    self.current_tok.pos_start,
+                    self.current_tok.pos_end,
+                    "'sea', int, float, identificador, '+', '-', '(', '[', o 'jamas' esperado",
+                )
+            )
         return res.success(node)
 
     def comp_expr(self):
         """Handles comparison expression."""
         res = ParseResult()
-        
-        if self.current_tok.matches(TT_KEYWORD, 'jamas'):
+
+        if self.current_tok.matches(TT_KEYWORD, "jamas"):
             op_tok = self.current_tok
             res.register_advancement()
             self.advance()
 
             node = res.register(self.comp_expr())
-            if res.error: return res
+            if res.error:
+                return res
             return res.success(UnaryOpNode(op_tok, node))
-        
-        node = res.register(self.binary_operation(self.arith_expr, (TT_EE, TT_NE, TT_LT, TT_LTE, TT_GT, TT_GTE)))
+
+        node = res.register(
+            self.binary_operation(
+                self.arith_expr, (TT_EE, TT_NE, TT_LT, TT_LTE, TT_GT, TT_GTE)
+            )
+        )
         if res.error:
-            return res.failure(SintaxisInvalidoError(
-                self.current_tok.pos_start, self.current_tok.pos_end, "'+', '-', '(', '[', 'si', 'para', 'mientras', 'define' o 'jamas' esperado"
-                ))
+            return res.failure(
+                SintaxisInvalidoError(
+                    self.current_tok.pos_start,
+                    self.current_tok.pos_end,
+                    "'+', '-', '(', '[', 'si', 'para', 'mientras', 'define' o 'jamas' esperado",
+                )
+            )
         return res.success(node)
 
     def arith_expr(self):
@@ -138,12 +182,13 @@ class Parser:
 
     def power(self):
         """Handles powers."""
-        return self.binary_operation(self.call,(TT_POW, ), self.factor)
+        return self.binary_operation(self.call, (TT_POW,), self.factor)
 
     def call(self):
         res = ParseResult()
         atom = res.register(self.atom())
-        if res.error: return res
+        if res.error:
+            return res
 
         if self.current_tok.type == TT_LPAREN:
             res.register_advancement()
@@ -157,21 +202,30 @@ class Parser:
                 arg_nodes.append(res.register(self.expr()))
                 if res.error:
                     return res.failure(
-                        SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, 
-                                    "')', 'sea', 'si', 'para', 'mientras', int, float, identificador, '+', '-', '(', '[' o 'jamas' esperado"))
-                
+                        SintaxisInvalidoError(
+                            self.current_tok.pos_start,
+                            self.current_tok.pos_end,
+                            "')', 'sea', 'si', 'para', 'mientras', int, float, identificador, '+', '-', '(', '[' o 'jamas' esperado",
+                        )
+                    )
+
                 while self.current_tok.type == TT_COMMA:
                     res.register_advancement()
                     self.advance()
 
                     arg_nodes.append(res.register(self.expr()))
-                    if res.error: return res
+                    if res.error:
+                        return res
 
                 if self.current_tok.type != TT_RPAREN:
                     return res.failure(
-                        SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, 
-                                    "',' o ')' esperado"))
-                
+                        SintaxisInvalidoError(
+                            self.current_tok.pos_start,
+                            self.current_tok.pos_end,
+                            "',' o ')' esperado",
+                        )
+                    )
+
                 res.register_advancement()
                 self.advance()
             return res.success(CallNode(atom, arg_nodes))
@@ -182,22 +236,29 @@ class Parser:
         statements = []
 
         if self.current_tok.type != TT_LBRACE:
-            return res.failure(SintaxisInvalidoError(
-                self.current_tok.pos_start, self.current_tok.pos_end, "'{' esperado"
-            ))
+            return res.failure(
+                SintaxisInvalidoError(
+                    self.current_tok.pos_start, self.current_tok.pos_end, "'{' esperado"
+                )
+            )
 
         res.register_advancement()
         self.advance()
 
         while self.current_tok.type != TT_RBRACE:
             stmt = res.register(self.expr())
-            if res.error: return res
+            if res.error:
+                return res
             statements.append(stmt)
 
             if self.current_tok.type == TT_EOF:
-                return res.failure(SintaxisInvalidoError(
-                    self.current_tok.pos_start, self.current_tok.pos_end, "'}' esperado"
-                ))
+                return res.failure(
+                    SintaxisInvalidoError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "'}' esperado",
+                    )
+                )
 
         res.register_advancement()
         self.advance()
@@ -214,23 +275,24 @@ class Parser:
             res.register_advancement()
             self.advance()
             return res.success(NumberNode(tok))
-        
+
         # Handling strings
         elif tok.type == (TT_STRING):
             res.register_advancement()
             self.advance()
             return res.success(StringNode(tok))
-        
+
         # Check for identifier
         elif tok.type == TT_IDENTIFIER:
             res.register_advancement()
             self.advance()
             return res.success(VarAccessNode(tok))
-        
+
         # Check for brackets
         elif tok.type == TT_LSQUARE:
             list_expr = res.register(self.list_expr())
-            if res.error: return res
+            if res.error:
+                return res
             return res.success(list_expr)
 
         # Parenthesis check
@@ -247,34 +309,47 @@ class Parser:
                 return res.success(expr)
             else:
                 return res.failure(
-                    SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "')' esperado")
+                    SintaxisInvalidoError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "')' esperado",
                     )
+                )
         # If statement
-        elif tok.matches(TT_KEYWORD, 'si'):
+        elif tok.matches(TT_KEYWORD, "si"):
             if_expr = res.register(self.if_expr())
-            if res.error: return res
+            if res.error:
+                return res
             return res.success(if_expr)
-        
+
         # For statement
-        elif tok.matches(TT_KEYWORD, 'para'):
+        elif tok.matches(TT_KEYWORD, "para"):
             for_expr = res.register(self.for_expr())
-            if res.error: return res
+            if res.error:
+                return res
             return res.success(for_expr)
-        
+
         # While expression
-        elif tok.matches(TT_KEYWORD, 'mientras'):
+        elif tok.matches(TT_KEYWORD, "mientras"):
             while_expr = res.register(self.while_expr())
-            if res.error: return res
+            if res.error:
+                return res
             return res.success(while_expr)
-        
+
         # Define functions
-        elif tok.matches(TT_KEYWORD, 'define'):
+        elif tok.matches(TT_KEYWORD, "define"):
             func_expr = res.register(self.func_def())
-            if res.error: return res
+            if res.error:
+                return res
             return res.success(func_expr)
 
         return res.failure(
-            SintaxisInvalidoError(tok.pos_start, tok.pos_end, "int, float, identificador, '+', '-', '(', '[', 'si', 'para', 'mientras', o 'define' esperado"))
+            SintaxisInvalidoError(
+                tok.pos_start,
+                tok.pos_end,
+                "int, float, identificador, '+', '-', '(', '[', 'si', 'para', 'mientras', o 'define' esperado",
+            )
+        )
 
     def list_expr(self):
         res = ParseResult()
@@ -284,8 +359,12 @@ class Parser:
         if self.current_tok.type != TT_LSQUARE:
             return res.failure(
                 SintaxisInvalidoError(
-                self.current_tok.pos_start, self.current_tok.pos_end, f"'[' esperado"))
-        
+                    self.current_tok.pos_start,
+                    self.current_tok.pos_end,
+                    f"'[' esperado",
+                )
+            )
+
         res.register_advancement()
         self.advance()
 
@@ -296,78 +375,108 @@ class Parser:
             element_nodes.append(res.register(self.expr()))
             if res.error:
                 return res.failure(
-                    SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, 
-                                "']', 'sea', 'define', 'para', 'mientras', int, float, identificador, '+', '-', '(', '[' o 'jamas' esperado"))
-                
+                    SintaxisInvalidoError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "']', 'sea', 'define', 'para', 'mientras', int, float, identificador, '+', '-', '(', '[' o 'jamas' esperado",
+                    )
+                )
+
             while self.current_tok.type == TT_COMMA:
                 res.register_advancement()
                 self.advance()
 
                 element_nodes.append(res.register(self.expr()))
-                if res.error: return res
+                if res.error:
+                    return res
 
             if self.current_tok.type != TT_RSQUARE:
                 return res.failure(
-                        SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, 
-                                    "',' o ')' esperado"))
+                    SintaxisInvalidoError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "',' o ')' esperado",
+                    )
+                )
 
             res.register_advancement()
             self.advance()
-        return res.success(ListNode(element_nodes, pos_start, self.current_tok.pos_end.copy()))
-    
+        return res.success(
+            ListNode(element_nodes, pos_start, self.current_tok.pos_end.copy())
+        )
+
     def if_expr(self):
         res = ParseResult()
         cases = []
         else_case = None
 
-        if not self.current_tok.matches(TT_KEYWORD, 'si'):
-            return res.failure(SintaxisInvalidoError(
-                self.current_tok.pos_start, self.current_tok.pos_end, f"'si' esperado"))
+        if not self.current_tok.matches(TT_KEYWORD, "si"):
+            return res.failure(
+                SintaxisInvalidoError(
+                    self.current_tok.pos_start,
+                    self.current_tok.pos_end,
+                    f"'si' esperado",
+                )
+            )
 
         res.register_advancement()
         self.advance()
 
         condition = res.register(self.comp_expr())
-        if res.error: return res
+        if res.error:
+            return res
 
-        if self.current_tok.matches(TT_KEYWORD, 'pues'):
+        if self.current_tok.matches(TT_KEYWORD, "pues"):
             res.register_advancement()
             self.advance()
             expr = res.register(self.expr())
-            if res.error: return res
+            if res.error:
+                return res
             cases.append((condition, expr))
         elif self.current_tok.type == TT_LBRACE:
             expr = res.register(self.statements())
-            if res.error: return res
+            if res.error:
+                return res
             cases.append((condition, expr))
         else:
-            return res.failure(SintaxisInvalidoError(
-                self.current_tok.pos_start, self.current_tok.pos_end,
-                "'pues' o '{' esperado"))
+            return res.failure(
+                SintaxisInvalidoError(
+                    self.current_tok.pos_start,
+                    self.current_tok.pos_end,
+                    "'pues' o '{' esperado",
+                )
+            )
 
-        while self.current_tok.matches(TT_KEYWORD, 'quizas'):
+        while self.current_tok.matches(TT_KEYWORD, "quizas"):
             res.register_advancement()
             self.advance()
 
             condition = res.register(self.comp_expr())
-            if res.error: return res
+            if res.error:
+                return res
 
-            if self.current_tok.matches(TT_KEYWORD, 'pues'):
+            if self.current_tok.matches(TT_KEYWORD, "pues"):
                 res.register_advancement()
                 self.advance()
                 expr = res.register(self.expr())
-                if res.error: return res
+                if res.error:
+                    return res
                 cases.append((condition, expr))
             elif self.current_tok.type == TT_LBRACE:
                 expr = res.register(self.statements())
-                if res.error: return res
+                if res.error:
+                    return res
                 cases.append((condition, expr))
             else:
-                return res.failure(SintaxisInvalidoError(
-                    self.current_tok.pos_start, self.current_tok.pos_end,
-                    "'pues' o '{' esperado"))
+                return res.failure(
+                    SintaxisInvalidoError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "'pues' o '{' esperado",
+                    )
+                )
 
-        if self.current_tok.matches(TT_KEYWORD, 'sino'):
+        if self.current_tok.matches(TT_KEYWORD, "sino"):
             res.register_advancement()
             self.advance()
 
@@ -375,100 +484,146 @@ class Parser:
                 else_case = res.register(self.statements())
             else:
                 else_case = res.register(self.expr())
-            if res.error: return res
+            if res.error:
+                return res
 
         return res.success(IfNode(cases, else_case))
-    
+
     def for_expr(self):
         res = ParseResult()
 
-        if not self.current_tok.matches(TT_KEYWORD, 'para'):
+        if not self.current_tok.matches(TT_KEYWORD, "para"):
             return res.failure(
-                SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "'para' esperado"))
-        
+                SintaxisInvalidoError(
+                    self.current_tok.pos_start,
+                    self.current_tok.pos_end,
+                    "'para' esperado",
+                )
+            )
+
         res.register_advancement()
         self.advance()
 
         if self.current_tok.type != TT_IDENTIFIER:
             return res.failure(
-                SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "Identificador esperado"))
-        
+                SintaxisInvalidoError(
+                    self.current_tok.pos_start,
+                    self.current_tok.pos_end,
+                    "Identificador esperado",
+                )
+            )
+
         var_name = self.current_tok
         res.register_advancement()
         self.advance()
 
         if self.current_tok.type != TT_EQ:
             return res.failure(
-                SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "'=' esperado"))
-        
+                SintaxisInvalidoError(
+                    self.current_tok.pos_start, self.current_tok.pos_end, "'=' esperado"
+                )
+            )
+
         res.register_advancement()
         self.advance()
 
         start_value = res.register(self.expr())
-        if res.error: return res
+        if res.error:
+            return res
 
-        if not self.current_tok.matches(TT_KEYWORD, 'hasta'):
-            return res.failure(SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "'hasta' esperado"))
-        
+        if not self.current_tok.matches(TT_KEYWORD, "hasta"):
+            return res.failure(
+                SintaxisInvalidoError(
+                    self.current_tok.pos_start,
+                    self.current_tok.pos_end,
+                    "'hasta' esperado",
+                )
+            )
+
         res.register_advancement()
         self.advance()
 
         end_value = res.register(self.expr())
-        if res.error: return res
+        if res.error:
+            return res
 
-        if self.current_tok.matches(TT_KEYWORD, 'paso'):
+        if self.current_tok.matches(TT_KEYWORD, "paso"):
             res.register_advancement()
             self.advance()
 
             step_value = res.register(self.expr())
-            if res.error: return res
+            if res.error:
+                return res
         else:
             step_value = None
 
-        if not self.current_tok.matches(TT_KEYWORD, 'pues'):
+        if not self.current_tok.matches(TT_KEYWORD, "pues"):
             return res.failure(
-                SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "'pues' esperado"))
-        
+                SintaxisInvalidoError(
+                    self.current_tok.pos_start,
+                    self.current_tok.pos_end,
+                    "'pues' esperado",
+                )
+            )
+
         res.register_advancement()
         self.advance()
 
         body = res.register(self.expr())
-        if res.error: return res
+        if res.error:
+            return res
 
         return res.success(ForNode(var_name, start_value, end_value, step_value, body))
-    
+
     def while_expr(self):
         res = ParseResult()
 
-        if not self.current_tok.matches(TT_KEYWORD, 'mientras'):
+        if not self.current_tok.matches(TT_KEYWORD, "mientras"):
             return res.failure(
-                SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "'mientras' esperado"))
-        
+                SintaxisInvalidoError(
+                    self.current_tok.pos_start,
+                    self.current_tok.pos_end,
+                    "'mientras' esperado",
+                )
+            )
+
         res.register_advancement()
         self.advance()
 
         condition = res.register(self.expr())
-        if res.error: return res
+        if res.error:
+            return res
 
-        if not self.current_tok.matches(TT_KEYWORD, 'pues'):
+        if not self.current_tok.matches(TT_KEYWORD, "pues"):
             return res.failure(
-                SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "'pues' esperado"))
-        
+                SintaxisInvalidoError(
+                    self.current_tok.pos_start,
+                    self.current_tok.pos_end,
+                    "'pues' esperado",
+                )
+            )
+
         res.register_advancement()
         self.advance()
 
         body = res.register(self.expr())
-        if res.error: return res
+        if res.error:
+            return res
         return res.success(WhileNode(condition, body))
-    
+
     def func_def(self):
         """Defines functions."""
         res = ParseResult()
 
-        if not self.current_tok.matches(TT_KEYWORD, 'define'):
+        if not self.current_tok.matches(TT_KEYWORD, "define"):
             return res.failure(
-                SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "'define' esperado"))
-        
+                SintaxisInvalidoError(
+                    self.current_tok.pos_start,
+                    self.current_tok.pos_end,
+                    "'define' esperado",
+                )
+            )
+
         res.register_advancement()
         self.advance()
 
@@ -479,13 +634,23 @@ class Parser:
 
             if self.current_tok.type != TT_LPAREN:
                 return res.failure(
-                    SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "'(' esperado"))
+                    SintaxisInvalidoError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "'(' esperado",
+                    )
+                )
         else:
             var_name_tok = None
             if self.current_tok.type != TT_LPAREN:
                 return res.failure(
-                    SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "'identificador o '(' esperado"))
-            
+                    SintaxisInvalidoError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "'identificador o '(' esperado",
+                    )
+                )
+
         res.register_advancement()
         self.advance()
 
@@ -502,39 +667,58 @@ class Parser:
 
                 if self.current_tok.type != TT_IDENTIFIER:
                     return res.failure(
-                        SintaxisInvalidoError(self.current_tok.pos_start,
-                                            self.current_tok.pos_end, "identificador esperado"))
-                
+                        SintaxisInvalidoError(
+                            self.current_tok.pos_start,
+                            self.current_tok.pos_end,
+                            "identificador esperado",
+                        )
+                    )
+
                 arg_name_toks.append(self.current_tok)
                 res.register_advancement()
                 self.advance()
 
             if self.current_tok.type != TT_RPAREN:
                 return res.failure(
-                    SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "')' esperado"))
+                    SintaxisInvalidoError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "')' esperado",
+                    )
+                )
         else:
             if self.current_tok.type != TT_RPAREN:
                 return res.failure(
-                    SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end, "'identificador o '(' esperado"))
-        
+                    SintaxisInvalidoError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "'identificador o '(' esperado",
+                    )
+                )
+
         res.register_advancement()
         self.advance()
 
         if self.current_tok.type != TT_LBRACE:
             return res.failure(
-                    SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end,
-                                        "'{' esperado"))
-        
+                SintaxisInvalidoError(
+                    self.current_tok.pos_start, self.current_tok.pos_end, "'{' esperado"
+                )
+            )
+
         res.register_advancement()
         self.advance()
         node_to_return = res.register(self.expr())
-        if res.error: return res
+        if res.error:
+            return res
 
         if self.current_tok.type != TT_RBRACE:
             return res.failure(
-                SintaxisInvalidoError(self.current_tok.pos_start, self.current_tok.pos_end,
-                                        "'}' esperado"))
-        
+                SintaxisInvalidoError(
+                    self.current_tok.pos_start, self.current_tok.pos_end, "'}' esperado"
+                )
+            )
+
         res.register_advancement()
         self.advance()
 
@@ -551,7 +735,10 @@ class Parser:
         if res.error:
             return res
 
-        while self.current_tok.type in ops or (self.current_tok.type, self.current_tok.value) in ops:
+        while (
+            self.current_tok.type in ops
+            or (self.current_tok.type, self.current_tok.value) in ops
+        ):
             # We assign the operation tokens
             op_tok = self.current_tok
 
