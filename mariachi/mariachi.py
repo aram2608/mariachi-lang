@@ -16,8 +16,8 @@ global_symbol_table.set("es_num", BuiltInFunction.es_num)
 global_symbol_table.set("es_texto", BuiltInFunction.es_texto)
 global_symbol_table.set("es_lista", BuiltInFunction.es_lista)
 global_symbol_table.set("es_funcion", BuiltInFunction.es_funcion)
-global_symbol_table.set("anade", BuiltInFunction.añade)
-global_symbol_table.set("quita", BuiltInFunction.quita)
+global_symbol_table.set("pon", BuiltInFunction.pon)
+global_symbol_table.set("roba", BuiltInFunction.roba)
 global_symbol_table.set("extiende",  BuiltInFunction.extiende)
 
 def run(fn, code, symbol_table=None):

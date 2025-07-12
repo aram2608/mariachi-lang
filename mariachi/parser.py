@@ -35,6 +35,40 @@ class Parser:
 
     ####################################
 
+    def statements(self):
+        res = ParseResult()
+        statements = []
+
+        if self.current_tok.type != TT_LBRACE:
+            return res.failure(
+                SintaxisInvalidoError(
+                    self.current_tok.pos_start, self.current_tok.pos_end, "'{' esperado"
+                )
+            )
+
+        res.register_advancement()
+        self.advance()
+
+        while self.current_tok.type != TT_RBRACE:
+            stmt = res.register(self.expr())
+            if res.error:
+                return res
+            statements.append(stmt)
+
+            if self.current_tok.type == TT_EOF:
+                return res.failure(
+                    SintaxisInvalidoError(
+                        self.current_tok.pos_start,
+                        self.current_tok.pos_end,
+                        "'}' esperado",
+                    )
+                )
+
+        res.register_advancement()
+        self.advance()
+
+        return res.success(BlockNode(statements))
+
     def expr(self):
         """Creates our expression."""
         res = ParseResult()
@@ -231,40 +265,6 @@ class Parser:
             return res.success(CallNode(atom, arg_nodes))
         return res.success(atom)
 
-    def statements(self):
-        res = ParseResult()
-        statements = []
-
-        if self.current_tok.type != TT_LBRACE:
-            return res.failure(
-                SintaxisInvalidoError(
-                    self.current_tok.pos_start, self.current_tok.pos_end, "'{' esperado"
-                )
-            )
-
-        res.register_advancement()
-        self.advance()
-
-        while self.current_tok.type != TT_RBRACE:
-            stmt = res.register(self.expr())
-            if res.error:
-                return res
-            statements.append(stmt)
-
-            if self.current_tok.type == TT_EOF:
-                return res.failure(
-                    SintaxisInvalidoError(
-                        self.current_tok.pos_start,
-                        self.current_tok.pos_end,
-                        "'}' esperado",
-                    )
-                )
-
-        res.register_advancement()
-        self.advance()
-
-        return res.success(BlockNode(statements))
-
     def atom(self):
         """Logic for handling atoms."""
         res = ParseResult()
@@ -426,19 +426,7 @@ class Parser:
         if res.error:
             return res
 
-        if self.current_tok.matches(TT_KEYWORD, "pues"):
-            res.register_advancement()
-            self.advance()
-            expr = res.register(self.expr())
-            if res.error:
-                return res
-            cases.append((condition, expr))
-        elif self.current_tok.type == TT_LBRACE:
-            expr = res.register(self.statements())
-            if res.error:
-                return res
-            cases.append((condition, expr))
-        else:
+        if not self.current_tok.matches(TT_KEYWORD, "pues"):
             return res.failure(
                 SintaxisInvalidoError(
                     self.current_tok.pos_start,
@@ -446,6 +434,14 @@ class Parser:
                     "'pues' o '{' esperado",
                 )
             )
+        
+        res.register_advancement()
+        self.advance()
+
+        expr = res.register(self.expr())
+        if res.error:
+            return res
+        cases.append((condition, expr))
 
         while self.current_tok.matches(TT_KEYWORD, "quizas"):
             res.register_advancement()
@@ -455,35 +451,28 @@ class Parser:
             if res.error:
                 return res
 
-            if self.current_tok.matches(TT_KEYWORD, "pues"):
-                res.register_advancement()
-                self.advance()
-                expr = res.register(self.expr())
-                if res.error:
-                    return res
-                cases.append((condition, expr))
-            elif self.current_tok.type == TT_LBRACE:
-                expr = res.register(self.statements())
-                if res.error:
-                    return res
-                cases.append((condition, expr))
-            else:
+            if not self.current_tok.matches(TT_KEYWORD, "pues"):
                 return res.failure(
                     SintaxisInvalidoError(
                         self.current_tok.pos_start,
                         self.current_tok.pos_end,
-                        "'pues' o '{' esperado",
+                        "'pues' esperado",
                     )
                 )
+
+            res.register_advancement()
+            self.advance()
+
+            expr = res.register(self.expr())
+            if res.error:
+                return res
+            cases.append((condition, expr))
 
         if self.current_tok.matches(TT_KEYWORD, "sino"):
             res.register_advancement()
             self.advance()
 
-            if self.current_tok.type == TT_LBRACE:
-                else_case = res.register(self.statements())
-            else:
-                else_case = res.register(self.expr())
+            else_case = res.register(self.expr())
             if res.error:
                 return res
 

@@ -148,13 +148,3 @@ class ListNode:
         self.element_nodes = element_nodes
         self.pos_start = pos_start
         self.pos_end = pos_end
-
-
-class BlockNode:
-    def __init__(self, statements):
-        self.statements = statements
-        self.pos_start = statements[0].pos_start if statements else None
-        self.pos_end = statements[-1].pos_end if statements else None
-
-    def __repr__(self):
-        return f"(bloque {self.statements})"

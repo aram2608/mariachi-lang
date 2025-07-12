@@ -1,40 +1,53 @@
-expr    : KEYWORD:sea IDENTIFIER EQ expr \\ lowest priority
-        : comp (KEYWORD:y|KEYWORD:o) comp)*
+statements      : LBRACE NEWLINE* expr (NEWLINE + expr)* NEWLINE* RBRACE \\ lowest priority
 
-comp    : NOT comp
-        : math (EE|LT|GT|LTE|GTE) math)*
+expr            : KEYWORD:sea IDENTIFIER EQ expr
+                : comp (KEYWORD:y|KEYWORD:o) comp)*
 
-math    : term ((PLUS|MINUS) term)* 
+comp            : NOT comp
+                : math (EE|LT|GT|LTE|GTE) math)*
 
-term    : factor ((MUL|DIV|MOD) factor)*
+math            : term ((PLUS|MINUS) term)* 
 
-factor  : (PLUS|MINUS) factor
-        : power
+term            : factor ((MUL|DIV|MOD) factor)*
 
-power   : call (POW factor)*
+factor          : (PLUS|MINUS) factor
+                : power
 
-call    : atom (LPAREN (expr (COMMA expr)*)? RPAREN)?
+power           : call (POW factor)*
 
-atom    : INT | FLOAT | IDENTIFIER | KEYWORD:cierto | KEYWORD:falso | KEYWORD:nada | STRING
-        : LPAREN expr RPAREN
-        : if
-        : while
-        : list
-        : stat
-        : define
+call            : atom (LPAREN (expr (COMMA expr)*)? RPAREN)?
 
-if      : KEYWORD:si expr KEYWORD:entonces expr
-        (KEYWORD:si no expr KEYWORD:entonces expr)*
-        (KEYWORD:sino expr)?
+atom            : INT | FLOAT | IDENTIFIER | STRING
+                : LPAREN expr RPAREN
+                : if
+                : while
+                : list
+                : define
 
-for     : KEYWORD:para IDENTIFIER EQ expr KEYWORD:hasta expr
-        (KEYWORD:paso expr)? KEYWORD:entonces expr
+if              : KEYWORD:si expr KEYWORD:pues
+                : (expr elif|else?)
+                | (NEWLINE statements KEYWORD:elif|elif)
 
-while   : KEYWORD:mientras expr KEYWORD:entonces expr
+elif            : KEYWORD:quizas expr KEYWORD:pues
+                : (expr elif|else?)
+                | (NEWLINE statements KEYWORD:elif|elif)
 
-define  : KEYWORD:define IDENTIFIER?
-        : LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN
-        : ARROW expr
-        : LBRACE expr RBRACE
+else            : KEYWORD:sino
+                expr
+                | (NEWLINE statements)
 
-list    : LSQUARE (expr (COMMA expr)*)? RSQUARE
+for             : KEYWORD:para IDENTIFIER EQ expr KEYWORD:hasta expr
+                (KEYWORD:paso expr)? KEYWORD:pues 
+                expr
+                | (NEWLINE statements KEYWORD:fin)
+
+while           : KEYWORD:mientras expr KEYWORD:pues expr
+                expr
+                | (NEWLINE statements KEYWORD:fin)
+
+define          : KEYWORD:define IDENTIFIER?
+                : LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN
+                LBRACE expr RBRACE
+                | NEWLINE statements KEYWORD:fin
+
+list            : LSQUARE (expr (COMMA expr)*)? RSQUARE
