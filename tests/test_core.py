@@ -3,9 +3,6 @@
 from mariachi.mariachi import run, SymbolTable, Context, Number, BlockNode, IfNode
 import math
 
-# All return objects are returned as a custom List type,
-# Need to find a way to compare for tests
-
 def run_mariachi(code, symbol_table):
     value, error = run("<test>", code, symbol_table=symbol_table)
     assert error is None
@@ -114,7 +111,11 @@ def test_builtins(fresh_table):
     #assert run_mariachi('canta("x")', fresh_table) == 'x' print returns 0 for some reason
     assert run_mariachi('eco("x")', fresh_table) == 'x'
 
-def test_if_else_pos_end(fresh_table):
+def test_if_else(fresh_table):
     # Create a mock IfNode with else_case
     result = run_mariachi("si 2 == 1 { canta(1) } sino { canta(0) }", fresh_table)
     print(result)
+
+def test_if(fresh_table):
+    result = run_mariachi("si 1 == 1 { canta(1) }", fresh_table)
+    assert result == 0

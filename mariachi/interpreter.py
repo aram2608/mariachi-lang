@@ -158,12 +158,8 @@ class Interpreter:
 
     def visit_IfNode(self, node, context):
         res = RTResult()
-        print(f"The visit_ifnode node: {node}")
-        print(f"cases: {node.cases}")
 
         for condition, expr in node.cases:
-            print(f"condition {condition}")
-            print(f"expression {expr}")
             condition_value = res.register(self.visit(condition, context))
             if res.error:
                 return res
@@ -217,9 +213,7 @@ class Interpreter:
             if res.error:
                 return res
         return res.success(
-            Number.null
-            if node.should_return_null
-            else List(elements).with_meta(
+            List(elements).with_meta(
                 context, pos_start=node.pos_start, pos_end=node.pos_end
             )
         )
@@ -239,9 +233,7 @@ class Interpreter:
             if res.error:
                 return res
         return res.success(
-            Number.null
-            if node.should_return_null
-            else List(elements).with_meta(
+            List(elements).with_meta(
                 context, pos_start=node.pos_start, pos_end=node.pos_end
             )
         )
@@ -253,7 +245,7 @@ class Interpreter:
         body_node = node.body_node
         arg_name = [arg_name.value for arg_name in node.arg_name_toks]
         func_value = Function(
-            func_name, body_node, arg_name, node.should_return_null
+            func_name, body_node, arg_name
         ).with_meta(context, node.pos_start, node.pos_end)
 
         if node.var_name_tok:
@@ -463,11 +455,10 @@ class BaseFunction(Value):
 
 
 class Function(BaseFunction):
-    def __init__(self, name, body_node, arg_names, should_return_null):
+    def __init__(self, name, body_node, arg_names):
         super().__init__(name)
         self.body_node = body_node
         self.arg_names = arg_names
-        self.should_return_null = should_return_null
 
     def execute(self, args):
         res = RTResult()
@@ -481,11 +472,11 @@ class Function(BaseFunction):
         value = res.register(interpreter.visit(self.body_node, exec_ctx))
         if res.error:
             return
-        return res.success(Number.null if self.should_return_null else value)
+        return res.success(value)
 
     def copy(self):
         copy = Function(
-            self.name, self.body_node, self.arg_names, self.should_return_null
+            self.name, self.body_node, self.arg_names
         )
         copy.set_context(self.context)
         copy.set_position(self.pos_start, self.pos_end)

@@ -72,7 +72,7 @@ class Parser:
         res.register_advancement()
         self.advance()
 
-        return res.success(BlockNode(statements, pos_start, self.current_tok.pos_end))
+        return res.success(BlockNode(statements, pos_start, self.current_tok.pos_end, True))
 
     def statements(self):
         res = ParseResult()
@@ -572,7 +572,7 @@ class Parser:
             return res
 
         return res.success(
-            ForNode(var_name, start_value, end_value, step_value, body, True)
+            ForNode(var_name, start_value, end_value, step_value, body)
         )
 
     def while_expr(self):
@@ -598,7 +598,7 @@ class Parser:
         if res.error:
             return res
 
-        return res.success(WhileNode(condition, body, True))
+        return res.success(WhileNode(condition, body))
 
     def func_def(self):
         """Defines functions."""
@@ -696,7 +696,7 @@ class Parser:
         if res.error:
             return res
 
-        return res.success(FuncDefNode(var_name_tok, arg_name_toks, body, False))
+        return res.success(FuncDefNode(var_name_tok, arg_name_toks, body))
 
     def binary_operation(self, func_a, ops, func_b=None):
         """Refactored logic for handling operators."""
