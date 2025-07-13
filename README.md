@@ -34,4 +34,17 @@ pytest
 sea x = 3
 define cuadrado(n) { n * n }
 cuadrado(2)
+
+mientras i < 5 {
+    canta(i)
+    i = i + 1
+}
+
+si x > 10 {
+    canta("Grande")
+} quizas x > 5 {
+    canta("Mediano")
+} sino {
+    canta("Pequeño")
+}
 ```
