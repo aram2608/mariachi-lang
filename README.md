@@ -10,7 +10,8 @@ With that said, the OOP nature of the tutorial is a bit overcomplex for the what
 
 If you are curious in playing around with the language you can go ahead and give it a try, I am open to suggestions through pull or issues requests.
 
-Current Status- If statements, and for and while loops are both broken.
+Current Status- for and while loops are both broken.
+If statements sorta work now
 
 ## Getting Started
 
