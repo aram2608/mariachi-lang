@@ -175,11 +175,11 @@ class Interpreter:
                 return res.success(result)
 
         if node.else_case:
-            expr, should_return_null = node.else_case
+            expr = node.else_case
             result = res.register(self.visit(expr, context))
             if res.error:
                 return res
-            return res.success(Number.nada if should_return_null else result)
+            return res.success(result)
 
         return res.success(Number.null)
 
