@@ -15,10 +15,14 @@ Current Status- everything should work, some strange behavior to note is all fun
 ## Getting Started
 
 1. Clone the repo
-2. Install requirements: `pip install -r requirements.txt`
-3. Run the REPL: `python -m mariachi`
+2. Install requirements: `pip install pytest typer`
+3. Run the REPL: `python -m mariachi.repl repl`
+
+Yep, the repl entry is in a file called repl, a bit redundant, I will fix that later.
 
 ## Running Tests
+
+Currrently all of the tests fail, reason being the custom types I mentioned earlier, gonna need to find a way to test those or refactor and then retest.
 
 ```bash
 pytest
