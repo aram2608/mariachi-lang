@@ -435,22 +435,12 @@ class BaseFunction(Value):
     def check_args(self, arg_names, args):
         res = RTResult()
 
-        if len(args) > len(arg_names):
+        if len(args) != len(arg_names):
             return res.failure(
                 EjecucionError(
                     self.pos_start,
                     self.pos_end,
-                    f"{len(args) - len(arg_names)} demasiados argumentos pasados a '{self.name}'",
-                    self.context,
-                )
-            )
-
-        if len(args) < len(arg_names):
-            return res.failure(
-                EjecucionError(
-                    self.pos_start,
-                    self.pos_end,
-                    f"{len(arg_names) - len(args)} no suficiente argumentos pasados a '{self.name}'",
+                    f"arity error, argumentos {args}, nombres {arg_names}'",
                     self.context,
                 )
             )
