@@ -6,7 +6,7 @@ mariachi-lang is a programming language with a Spanish-inspired syntax. A large 
 
 The tutorial is quite Javaesque and follows similar patterns as Robert Nystrom's book [Crafting Interpreters](https://craftinginterpreters.com/), so if you like the youtube series, you'll love Robert's book and I recommend checking that out as well.
 
-With that said, the OOP nature of the tutorial is a bit overcomplex for the what I have in mind for mariachi-lang. The current goal is to refactor the code in order to make it more Pythonic while relying on Python native types, this will hopefully make it more consitent, however it will lose some of the power gained through implementing custom language types.
+With that said, the OOP nature of the tutorial is a bit overcomplex for what I have in mind for mariachi-lang. The current goal is to refactor the code in order to make it more Pythonic while relying on Python native types, this will hopefully make it more consitent, however it will lose some of the power gained through implementing custom language types.
 
 If you are curious in playing around with the language you can go ahead and give it a try, I am open to suggestions through pull or issues requests.
 
