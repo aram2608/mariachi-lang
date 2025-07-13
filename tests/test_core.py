@@ -3,13 +3,20 @@
 from mariachi.mariachi import run, SymbolTable, Context, Number
 import math
 
+# All return objects are returned as a custom List type,
+# Need to find a way to compare for tests
+
 def run_mariachi(code, symbol_table):
     value, error = run("<test>", code, symbol_table=symbol_table)
     assert error is None
-    return value.elements if value else None
+    if hasattr(value, 'elements'):
+        # debug line
+        print(type(value))
+        return value.elements[0]
+    return value
 
 def test_addition(fresh_table):
-    assert run_mariachi("1 + 2", fresh_table) == [3]
+    assert run_mariachi("1 + 2", fresh_table) == 3
 
 def test_subtraction(fresh_table):
     assert run_mariachi("5 - 3", fresh_table) == 2
