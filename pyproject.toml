@@ -10,7 +10,9 @@ authors = [
   { name = "Javier Arambula" }
 ]
 requires-python = ">=3.8"
-dependencies = []
+dependencies = [
+  "typer",
+]
 
 [tool.setuptools]
 include-package-data = true

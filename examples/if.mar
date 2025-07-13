@@ -5,3 +5,7 @@ si x > 10 {
 } sino {
     canta("Pequeño")
 }
+
+si 1 == 1 { canta(1) }
+
+si 1 > 10 { canta("grande") } sino { canta("chico") }

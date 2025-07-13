@@ -158,8 +158,12 @@ class Interpreter:
 
     def visit_IfNode(self, node, context):
         res = RTResult()
+        print(f"The visit_ifnode node: {node}")
+        print(f"cases: {node.cases}")
 
-        for condition, expr, should_return_null in node.cases:
+        for condition, expr in node.cases:
+            print(f"condition {condition}")
+            print(f"expression {expr}")
             condition_value = res.register(self.visit(condition, context))
             if res.error:
                 return res
@@ -168,7 +172,7 @@ class Interpreter:
                 result = res.register(self.visit(expr, context))
                 if res.error:
                     return res
-                return res.success(Number.nada if should_return_null else result)
+                return res.success(result)
 
         if node.else_case:
             expr, should_return_null = node.else_case
@@ -495,6 +499,7 @@ class Function(BaseFunction):
         )
         copy.set_context(self.context)
         copy.set_position(self.pos_start, self.pos_end)
+        print(copy)
         return copy
 
     def __repr__(self):
