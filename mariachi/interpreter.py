@@ -696,6 +696,9 @@ class Number(Value):
 
     def __add__(self, other):
         return Number(self.value + other.value)
+    
+    def __eq__(self, other):
+        return self.value == other.value
 
     def added_to(self, other):
         """A function to represent addition."""
@@ -862,6 +865,9 @@ class String(Value):
     def __init__(self, value):
         super().__init__()
         self.value = value
+
+    def __eq__(self, other):
+        return self.value == other.value
 
     def added_to(self, other):
         if isinstance(other, String):
