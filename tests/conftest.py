@@ -1,7 +1,7 @@
 # tests/conftest.py
 
 import pytest
-from mariachi.mariachi import SymbolTable, Number
+from mariachi.mariachi import SymbolTable
 
 @pytest.fixture
 def fresh_table():

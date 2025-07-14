@@ -112,14 +112,10 @@ def test_list_manipulation(fresh_table):
     assert result_3 == [1, 2, 3, 4]
 
 def test_builtins(fresh_table):
-    #assert run_mariachi('canta("x")', fresh_table) == 'x' print returns 0 for some reason
-    result = run_mariachi('eco("x")', fresh_table)
-    assert result.value == 'x'
+    assert run_mariachi('eco("x")', fresh_table) == String('x')
 
 def test_if_else(fresh_table):
-    result = run_mariachi("si 2 == 1 { eco(1) } sino { eco(0) }", fresh_table)
-    assert result.value == '0'
+    assert run_mariachi("si 2 == 1 { eco(1) } sino { eco(0) }", fresh_table) == String('0')
 
 def test_if(fresh_table):
-    result = run_mariachi("si 1 == 1 { eco(1) }", fresh_table)
-    assert result.value == '1'
+    assert run_mariachi("si 1 == 1 { eco(1) }", fresh_table) == String('1')

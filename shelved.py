@@ -15,6 +15,5 @@ KEYWORDS = [
     'sigue',     # continue
 
     'baila',     # could be cool but dont know what it would do
-    'canta',     # print
     ]
 
