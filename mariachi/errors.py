@@ -32,6 +32,10 @@ class CaracterEsperadoError(Error):
     def __init__(self, pos_start, pos_end, details):
         super().__init__(pos_start, pos_end, "Caracter esperado", details)
 
+class ErrorDeTipo(Error):
+    def __init__(self, pos_start, pos_end, details):
+        super().__init__(pos_start, pos_end, "Error de tipo", details)
+
 
 class EjecucionError(Error):
     def __init__(self, pos_start, pos_end, details, context):

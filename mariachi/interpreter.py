@@ -485,6 +485,9 @@ class Function(BaseFunction):
 
     def __repr__(self):
         return f"<funcion {self.name}>"
+    
+    def __str__(self):
+        return f"{self.name}"
 
 
 class BuiltInFunction(BaseFunction):
@@ -518,6 +521,9 @@ class BuiltInFunction(BaseFunction):
 
     def __repr__(self):
         return f"<built-in function {self.name}>"
+    
+    def __str__(self):
+        return f"{self.name}"
 
     def execute_canta(self, exec_ctx):
         print(str(exec_ctx.symbol_table.get("value")))
@@ -688,12 +694,18 @@ class Number(Value):
         super().__init__()
         self.value = value
 
+    def __add__(self, other):
+        return Number(self.value + other.value)
+
     def added_to(self, other):
         """A function to represent addition."""
         if isinstance(other, Number):
-            return Number(self.value + other.value).set_context(self.context), None
+            result = self + other
+            return result, None
         else:
-            return None, self.illegal_operation(self, other)
+            return None, ErrorDeTipo(self.pos_start, other.pos_end,
+                                    f"Error de tipo, no se puede sumar {str(self)} con {str(other)}"
+                                    )
 
     def subbed_by(self, other):
         """A function to represent subtraction."""
@@ -835,7 +847,10 @@ class Number(Value):
         return copy
 
     def __repr__(self):
-        return str(self.value)
+        return f"Numero: {self.value}"
+    
+    def __str__(self):
+        return f"{self.value}"
 
 
 Number.null = Number(0)
@@ -851,12 +866,16 @@ class String(Value):
     def added_to(self, other):
         if isinstance(other, String):
             return String(self.value + other.value).set_context(self.context), None
-        return None, self.illegal_operation(self, other)
+        return None, ErrorDeTipo(self.pos_start, other.pos_end,
+                                    f"Error de tipo, no se puede sumar {repr(self)} con {repr(other)}"
+                                    )
 
     def multed_by(self, other):
         if isinstance(other, Number):
             return String(self.value * other.value).set_context(self.context), None
-        return None, self.illegal_operation(self, other)
+        return None, ErrorDeTipo(self.pos_start, other.pos_end,
+                                    f"Error de tipo, no se puede multiplicar {repr(self)} con {repr(other)}"
+                                    )
 
     def is_true(self):
         return len(self.value) > 0
@@ -868,8 +887,10 @@ class String(Value):
         return copy
 
     def __repr__(self):
+        return f"Texto: {self.value}"
+    
+    def __str__(self):
         return f"{self.value}"
-
 
 class List(Value):
     def __init__(self, elements):
@@ -926,4 +947,7 @@ class List(Value):
         return copy
 
     def __repr__(self):
+        return f'Lista: [{", ".join([str(x) for x in self.elements])}]'
+    
+    def __str__(self):
         return f'[{", ".join([str(x) for x in self.elements])}]'
