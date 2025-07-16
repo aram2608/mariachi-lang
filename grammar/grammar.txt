@@ -1,8 +1,13 @@
-TODO: Added comments
+TODO: Add comments
 
 block           : LBRACE NEWLINE* statements? NEWLINE* RBRACE
 
-statements      : expr (NEWLINE+ expr)*
+statements      : statement (NEWLINE+ statement)*
+
+statement       : KEYWORD:regresa expr?
+                : KEYWORD:sigue
+                : KEYWORD:rompe
+                : expr
 
 expr            : KEYWORD:sea IDENTIFIER EQ expr
                 | KEYWORD:fija IDENTIFIER EQ expr

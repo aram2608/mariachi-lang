@@ -88,7 +88,9 @@ class IfNode:
         self.else_case = else_case
 
         self.pos_start = self.cases[0][0].pos_start
-        self.pos_end = (self.else_case.pos_end if self.else_case else self.cases[-1][1].pos_end)
+        self.pos_end = (
+            self.else_case.pos_end if self.else_case else self.cases[-1][1].pos_end
+        )
 
 
 class ForNode:
@@ -161,3 +163,22 @@ class BlockNode:
         self.pos_start = pos_start
         self.pos_end = pos_end
         self.should_return_null = should_return_null
+
+
+class ReturnNode:
+    def __init__(self, node_to_return, pos_start, pos_end):
+        self.node_to_return = node_to_return
+        self.pos_start = pos_start
+        self.pos_end = pos_end
+
+
+class ContinueNode:
+    def __init__(self, pos_start, pos_end):
+        self.pos_start = pos_start
+        self.pos_end = pos_end
+
+
+class BreakNode:
+    def __init__(self, pos_start, pos_end):
+        self.pos_start = pos_start
+        self.pos_end = pos_end

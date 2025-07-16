@@ -3,22 +3,23 @@ import typer
 from .mariachi import run
 
 # ANSI escape codes for styling
-RESET   = "\033[0m"
-BOLD    = "\033[1m"
+RESET = "\033[0m"
+BOLD = "\033[1m"
 
 # Color codes
-RED     = "\033[91m"
-GREEN   = "\033[92m"
-GREY    = "\033[90m"
+RED = "\033[91m"
+GREEN = "\033[92m"
+GREY = "\033[90m"
 
 # Styled text formats
-TITLE    = f"{BOLD}{RED}"
+TITLE = f"{BOLD}{RED}"
 SUBTITLE = f"{GREEN}"
-PROMPT   = f"{RED}mariachi{RESET} > "
+PROMPT = f"{RED}mariachi{RESET} > "
 intro = f"{RED}Saludos desde el Mariachi REPL!{RESET}\n"
 intro += f"{GREEN}Type 'salir' to quit.{RESET}\n"
 
 mariachi = typer.Typer()
+
 
 @mariachi.command()
 def debug_repl():
@@ -44,6 +45,7 @@ def debug_repl():
                     print(repr(result))
         except Exception as e:
             print(f"{e}")
+
 
 @mariachi.command()
 def repl():

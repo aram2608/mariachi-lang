@@ -15,7 +15,6 @@ KEYWORDS = [
     "o",  # or
     "jamas",  # not
     "si",  # if
-    "pues",  # then
     "quizas",  # elseif
     "sino",  # else
     "mientras",  # while
@@ -23,7 +22,9 @@ KEYWORDS = [
     "hasta",  # to
     "paso",  # step
     "define",  # define functions
-    "fin",
+    "entrega",  # return
+    "sigue",  # continue
+    "rompe",  # break
 ]
 
 #################################

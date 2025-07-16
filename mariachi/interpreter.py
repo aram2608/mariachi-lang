@@ -27,10 +27,10 @@ class Interpreter:
     def visit_BinaryOpNode(self, node, context):
         res = RTResult()
         left = res.register(self.visit(node.left_node, context))
-        if res.error:
+        if res.should_return():
             return res
         right = res.register(self.visit(node.right_node, context))
-        if res.error:
+        if res.should_return():
             return res
 
         if node.op_tok.type == TT_PLUS:
@@ -80,7 +80,7 @@ class Interpreter:
     def visit_UnaryOpNode(self, node, context):
         res = RTResult()
         number = res.register(self.visit(node.node, context))
-        if res.error:
+        if res.should_return():
             return res
 
         error = None
@@ -98,7 +98,7 @@ class Interpreter:
         res = RTResult()
         var_name = node.var_name_tok.value
         value = res.register(self.visit(node.value_node, context))
-        if res.error:
+        if res.should_return():
             return res
 
         context.symbol_table.set(var_name, value)
@@ -127,7 +127,7 @@ class Interpreter:
         res = RTResult()
         name = node.const_name_tok.value
         value = res.register(self.visit(node.value_node, context))
-        if res.error:
+        if res.should_return():
             return res
 
         try:
@@ -161,19 +161,19 @@ class Interpreter:
 
         for condition, expr in node.cases:
             condition_value = res.register(self.visit(condition, context))
-            if res.error:
+            if res.should_return():
                 return res
 
             if condition_value.is_true():
                 result = res.register(self.visit(expr, context))
-                if res.error:
+                if res.should_return():
                     return res
                 return res.success(result)
 
         if node.else_case:
             expr = node.else_case
             result = res.register(self.visit(expr, context))
-            if res.error:
+            if res.should_return():
                 return res
             return res.success(result)
 
@@ -184,16 +184,16 @@ class Interpreter:
         elements = []
 
         start_value = res.register(self.visit(node.start_value_node, context))
-        if res.error:
+        if res.should_return():
             return res
 
         end_value = res.register(self.visit(node.end_value_node, context))
-        if res.error:
+        if res.should_return():
             return res
 
         if node.step_value_node:
             step_value = res.register(self.visit(node.step_value_node, context))
-            if res.error:
+            if res.should_return():
                 return res
         else:
             step_value = Number(1)
@@ -210,7 +210,7 @@ class Interpreter:
             i += step_value.value
 
             elements.append(res.register(self.visit(node.body_node, context)))
-            if res.error:
+            if res.should_return():
                 return res
         return res.success(
             List(elements).with_meta(
@@ -223,14 +223,14 @@ class Interpreter:
         elements = []
         while True:
             condition = res.register(self.visit(node.condition_node, context))
-            if res.error:
+            if res.should_return():
                 return res
 
             if not condition.is_true():
                 break
 
             elements.append(res.register(self.visit(node.body_node, context)))
-            if res.error:
+            if res.should_return():
                 return res
         return res.success(
             List(elements).with_meta(
@@ -244,9 +244,9 @@ class Interpreter:
         func_name = node.var_name_tok.value if node.var_name_tok else None
         body_node = node.body_node
         arg_name = [arg_name.value for arg_name in node.arg_name_toks]
-        func_value = Function(
-            func_name, body_node, arg_name
-        ).with_meta(context, node.pos_start, node.pos_end)
+        func_value = Function(func_name, body_node, arg_name).with_meta(
+            context, node.pos_start, node.pos_end
+        )
 
         if node.var_name_tok:
             context.symbol_table.set(func_name, func_value)
@@ -258,18 +258,18 @@ class Interpreter:
         args = []
 
         value_to_call = res.register(self.visit(node.node_to_call, context))
-        if res.error:
+        if res.should_return():
             return res
 
         value_to_call = value_to_call.copy().set_position(node.pos_start, node.pos_end)
 
         for arg_node in node.arg_nodes:
             args.append(res.register(self.visit(arg_node, context)))
-            if res.error:
+            if res.should_return():
                 return res
 
         return_value = res.register(value_to_call.execute(args))
-        if res.error:
+        if res.should_return():
             return res
         return_value = return_value.copy().with_meta(
             context, node.pos_start, node.pos_end
@@ -287,7 +287,7 @@ class Interpreter:
 
         for element_node in node.element_nodes:
             elements.append(res.register(self.visit(element_node, context)))
-            if res.error:
+            if res.should_return():
                 return res
         return res.success(
             List(elements).with_meta(context, node.pos_start, node.pos_end)
@@ -299,10 +299,19 @@ class Interpreter:
 
         for statement in node.statement_nodes.element_nodes:
             result = res.register(self.visit(statement, context))
-            if res.error:
+            if res.should_return():
                 return res
 
         return res.success(result or Number.null)
+
+    def visit_ContinueNode(self, node, context):
+        pass
+
+    def visit_BreakNode(self, node, context):
+        pass
+
+    def visit_ReturnNode(self, node, context):
+        pass
 
 
 class SymbolTable:
@@ -448,7 +457,7 @@ class BaseFunction(Value):
     def check_and_populate_args(self, arg_names, args, exec_ctx):
         res = RTResult()
         res.register(self.check_args(arg_names, args))
-        if res.error:
+        if res.should_return():
             return res
         self.populate_args(arg_names, args, exec_ctx)
         return res.success(None)
@@ -466,18 +475,16 @@ class Function(BaseFunction):
         exec_ctx = self.generate_new_context()
 
         res.register(self.check_and_populate_args(self.arg_names, args, exec_ctx))
-        if res.error:
+        if res.should_return():
             return res
 
         value = res.register(interpreter.visit(self.body_node, exec_ctx))
-        if res.error:
+        if res.should_return():
             return
         return res.success(value)
 
     def copy(self):
-        copy = Function(
-            self.name, self.body_node, self.arg_names
-        )
+        copy = Function(self.name, self.body_node, self.arg_names)
         copy.set_context(self.context)
         copy.set_position(self.pos_start, self.pos_end)
         print(copy)
@@ -485,7 +492,7 @@ class Function(BaseFunction):
 
     def __repr__(self):
         return f"<funcion {self.name}>"
-    
+
     def __str__(self):
         return f"{self.name}"
 
@@ -502,11 +509,11 @@ class BuiltInFunction(BaseFunction):
         method = getattr(self, method_name, self.no_visit_method)
 
         res.register(self.check_and_populate_args(method.arg_names, args, exec_ctx))
-        if res.error:
+        if res.should_return():
             return
 
         return_value = res.register(method(exec_ctx))
-        if res.error:
+        if res.should_return():
             return res
         return res.success(return_value)
 
@@ -521,7 +528,7 @@ class BuiltInFunction(BaseFunction):
 
     def __repr__(self):
         return f"<built-in function {self.name}>"
-    
+
     def __str__(self):
         return f"{self.name}"
 
@@ -696,7 +703,7 @@ class Number(Value):
 
     def __add__(self, other):
         return Number(self.value + other.value)
-    
+
     def __eq__(self, other):
         return self.value == other.value
 
@@ -706,9 +713,11 @@ class Number(Value):
             result = self + other
             return result, None
         else:
-            return None, ErrorDeTipo(self.pos_start, other.pos_end,
-                                    f"Error de tipo, no se puede sumar {str(self)} con {str(other)}"
-                                    )
+            return None, ErrorDeTipo(
+                self.pos_start,
+                other.pos_end,
+                f"Error de tipo, no se puede sumar {str(self)} con {str(other)}",
+            )
 
     def subbed_by(self, other):
         """A function to represent subtraction."""
@@ -851,7 +860,7 @@ class Number(Value):
 
     def __repr__(self):
         return f"Numero: {self.value}"
-    
+
     def __str__(self):
         return f"{self.value}"
 
@@ -872,16 +881,20 @@ class String(Value):
     def added_to(self, other):
         if isinstance(other, String):
             return String(self.value + other.value).set_context(self.context), None
-        return None, ErrorDeTipo(self.pos_start, other.pos_end,
-                                    f"Error de tipo, no se puede sumar {repr(self)} con {repr(other)}"
-                                    )
+        return None, ErrorDeTipo(
+            self.pos_start,
+            other.pos_end,
+            f"Error de tipo, no se puede sumar {repr(self)} con {repr(other)}",
+        )
 
     def multed_by(self, other):
         if isinstance(other, Number):
             return String(self.value * other.value).set_context(self.context), None
-        return None, ErrorDeTipo(self.pos_start, other.pos_end,
-                                    f"Error de tipo, no se puede multiplicar {repr(self)} con {repr(other)}"
-                                    )
+        return None, ErrorDeTipo(
+            self.pos_start,
+            other.pos_end,
+            f"Error de tipo, no se puede multiplicar {repr(self)} con {repr(other)}",
+        )
 
     def is_true(self):
         return len(self.value) > 0
@@ -894,9 +907,10 @@ class String(Value):
 
     def __repr__(self):
         return f"Texto: {self.value}"
-    
+
     def __str__(self):
         return f"{self.value}"
+
 
 class List(Value):
     def __init__(self, elements):
@@ -954,6 +968,6 @@ class List(Value):
 
     def __repr__(self):
         return f'Lista: [{", ".join([str(x) for x in self.elements])}]'
-    
+
     def __str__(self):
         return f'[{", ".join([str(x) for x in self.elements])}]'

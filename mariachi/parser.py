@@ -72,7 +72,9 @@ class Parser:
         res.register_advancement()
         self.advance()
 
-        return res.success(BlockNode(statements, pos_start, self.current_tok.pos_end, True))
+        return res.success(
+            BlockNode(statements, pos_start, self.current_tok.pos_end, True)
+        )
 
     def statements(self):
         res = ParseResult()
@@ -83,7 +85,7 @@ class Parser:
             res.register_advancement()
             self.advance()
 
-        stmt = res.register(self.expr())
+        stmt = res.register(self.statement())
         if res.error:
             return res
         statements.append(stmt)
@@ -102,7 +104,7 @@ class Parser:
             if not more_stmts:
                 break
 
-            stmt = res.try_register(self.expr())
+            stmt = res.try_register(self.statement())
             if not stmt:
                 self.reverse(res.to_reverse_count)
                 more_stmts = False
@@ -111,6 +113,43 @@ class Parser:
         return res.success(
             ListNode(statements, pos_start, self.current_tok.pos_end.copy())
         )
+
+    def statement(
+        self,
+    ):
+        res = ParseResult()
+        pos_start = self.current_tok.pos_start.copy()
+
+        if self.current_tok.matches(TT_KEYWORD, "regresa"):
+            res.register_advancement()
+            self.advance()
+
+            expr = res.try_register(self.expr())
+            if not expr:
+                self.reverse(res.to_reverse_count)
+            return res.success(
+                ReturnNode(expr, pos_start, self.current_tok.pos_end.copy())
+            )
+
+        if self.current_tok.matches(TT_KEYWORD, "sigue"):
+            res.register_advancement()
+            self.advance()
+            return res.success(ContinueNode(pos_start, self.current_tok.pos_end.copy()))
+
+        if self.current_tok.matches(TT_KEYWORD, "rompe"):
+            res.register_advancement()
+            self.advance()
+            return res.success(BreakNode(pos_start, self.current_tok.pos_end.copy()))
+
+        expr = res.register(self.expr())
+        if res.error:
+            return res.failure(
+                SintaxisInvalidoError(
+                    self.current_tok.pos_start,
+                    self.current_tok.pos_end,
+                    "'regresa', 'rompe', 'sigue', 'sea', int, float, identificador, '+', '-', '(', '[', o 'jamas' esperado",
+                )
+            )
 
     def expr(self):
         """Creates our expression."""
@@ -571,9 +610,7 @@ class Parser:
         if res.error:
             return res
 
-        return res.success(
-            ForNode(var_name, start_value, end_value, step_value, body)
-        )
+        return res.success(ForNode(var_name, start_value, end_value, step_value, body))
 
     def while_expr(self):
         res = ParseResult()
