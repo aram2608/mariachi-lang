@@ -88,7 +88,7 @@ def test_const_overwrite():
         assert str(e) == "'x' ya está definido y no se puede redefinir como constante"
 
 def test_function_declaration(fresh_table):
-    run('programma', "define hola(x) { x + 1 }", fresh_table)
+    run('programma', "define hola(x) { entrega x + 1 }", fresh_table)
     result = run('programma', "hola(2)", fresh_table)
     result = result[0]
     result = result.elements

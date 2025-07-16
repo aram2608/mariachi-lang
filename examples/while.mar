@@ -1,6 +1,5 @@
 sea i = 0
-
 mientras i < 5 {
-    canta(i)
-    i = i + 1
+    eco(i);
+    i = i + 1;
 }

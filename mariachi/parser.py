@@ -120,7 +120,7 @@ class Parser:
         res = ParseResult()
         pos_start = self.current_tok.pos_start.copy()
 
-        if self.current_tok.matches(TT_KEYWORD, "regresa"):
+        if self.current_tok.matches(TT_KEYWORD, "entrega"):
             res.register_advancement()
             self.advance()
 

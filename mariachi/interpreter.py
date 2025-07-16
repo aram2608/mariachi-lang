@@ -210,12 +210,16 @@ class Interpreter:
             i += step_value.value
 
             value = res.register(self.visit(node.body_node, context))
-            if res.should_return() and res.loop_should_continue == False and res.loop_should_break == False:
+            if (
+                res.should_return()
+                and res.loop_should_continue == False
+                and res.loop_should_break == False
+            ):
                 return res
-            
+
             if res.loop_should_continue:
                 continue
-            
+
             if res.loop_should_break:
                 break
 
@@ -238,9 +242,13 @@ class Interpreter:
                 break
 
             value = res.register(self.visit(node.body_node, context))
-            if res.should_return() and res.loop_should_continue == False and res.loop_should_break == False:
+            if (
+                res.should_return()
+                and res.loop_should_continue == False
+                and res.loop_should_break == False
+            ):
                 return res
-            
+
             if res.loop_should_continue:
                 continue
 
@@ -260,9 +268,9 @@ class Interpreter:
         func_name = node.var_name_tok.value if node.var_name_tok else None
         body_node = node.body_node
         arg_name = [arg_name.value for arg_name in node.arg_name_toks]
-        func_value = Function(func_name, body_node, arg_name, node.should_auto_return).with_meta(
-            context, node.pos_start, node.pos_end
-        )
+        func_value = Function(
+            func_name, body_node, arg_name, node.should_auto_return
+        ).with_meta(context, node.pos_start, node.pos_end)
 
         if node.var_name_tok:
             context.symbol_table.set(func_name, func_value)
@@ -508,11 +516,17 @@ class Function(BaseFunction):
         value = res.register(interpreter.visit(self.body_node, exec_ctx))
         if res.should_return() and res.func_return_value == None:
             return res
-        ret_value = (value if self.should_auto_return else None) or res.func_return_value or Number.null 
+        ret_value = (
+            (value if self.should_auto_return else None)
+            or res.func_return_value
+            or Number.null
+        )
         return res.success(ret_value)
 
     def copy(self):
-        copy = Function(self.name, self.body_node, self.arg_names, self.should_auto_return)
+        copy = Function(
+            self.name, self.body_node, self.arg_names, self.should_auto_return
+        )
         copy.set_context(self.context)
         copy.set_position(self.pos_start, self.pos_end)
         print(copy)
@@ -730,10 +744,16 @@ class Number(Value):
         self.value = value
 
     def __add__(self, other):
-        return Number(self.value + other.value)
+        if hasattr(other, "value"):
+            return Number(self.value + other.value)
+        else:
+            return None
 
     def __eq__(self, other):
-        return self.value == other.value
+        if hasattr(other, "value"):
+            return self.value == other.value
+        else:
+            return None
 
     def added_to(self, other):
         """A function to represent addition."""
@@ -904,7 +924,10 @@ class String(Value):
         self.value = value
 
     def __eq__(self, other):
-        return self.value == other.value
+        if hasattr(other, "value"):
+            return self.value == other.value
+        else:
+            return None
 
     def added_to(self, other):
         if isinstance(other, String):

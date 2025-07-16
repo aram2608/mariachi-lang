@@ -9,3 +9,11 @@ si x > 10 {
 si 1 == 1 { canta(1) }
 
 si 1 > 10 { canta("grande") } sino { canta("chico") }
+
+para i = 0 hasta 10 { 
+    si i == 4 { 
+    sigue } 
+    quizas i == 8 { 
+    rompe } 
+    sino {
+    sea x = x + i } } 

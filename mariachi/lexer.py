@@ -35,6 +35,10 @@ class Lexer:
             if self.current_char in " \t":
                 self.advance()
 
+            # Handle comments
+            elif self.current_char == "#":
+                self.skip_comment()
+
             # Handle newlines
             elif self.current_char in ";\n":
                 tokens.append(Token(TT_NEWLINE, pos_start=self.pos))
@@ -246,6 +250,14 @@ class Lexer:
 
         self.advance()
         return Token(TT_STRING, string_, pos_start, pos_end=self.pos)
+
+    def skip_comment(self):
+        self.advance()
+
+        while self.current_char != "\n":
+            self.advance()
+
+        self.advance()
 
 
 class Position:

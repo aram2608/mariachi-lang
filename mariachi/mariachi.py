@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from .values import *
 from .lexer import *
 from .parser import *
@@ -44,25 +46,12 @@ def run(fn, code, symbol_table=None):
     return result.value, result.error
 
 
-def run_repl(fn, code, symbol_table=None):
-    """The code runner used to parse the code and tokenize inputs."""
-    # Generates the tokens
-    lexer = Lexer(fn, code)
-    tokens, error = lexer.make_tokens()
+def run_file(file):
+    fn = Path(file)
+    script = fn.read_text(encoding="utf-8")
+    result, error = run(fn, script)
+
     if error:
-        return None, error
-
-    # Generates the AST
-    parser = Parser(tokens)
-    parser.repl = True
-    ast = parser.parse()
-    if ast.error:
-        return None, ast.error
-
-    # Run interpreter
-    interpreter = Interpreter()
-    context = Context("<programma>")
-
-    context.symbol_table = global_symbol_table
-    result = interpreter.visit(ast.node, context)
-    return result.value, result.error
+        print(error.as_string())
+    else:
+        print(result)
