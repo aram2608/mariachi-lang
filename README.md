@@ -22,8 +22,6 @@ Yep, the repl entry is in a file called repl, a bit redundant, I will fix that l
 
 ## Running Tests
 
-Currrently all of the tests fail, reason being the custom types I mentioned earlier, gonna need to find a way to test those or refactor and then retest.
-
 ```bash
 pytest
 ```
