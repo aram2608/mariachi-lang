@@ -209,9 +209,17 @@ class Interpreter:
             context.symbol_table.set(node.var_name_tok.value, Number(i))
             i += step_value.value
 
-            elements.append(res.register(self.visit(node.body_node, context)))
-            if res.should_return():
+            value = res.register(self.visit(node.body_node, context))
+            if res.should_return() and res.loop_should_continue == False and res.loop_should_break == False:
                 return res
+            
+            if res.loop_should_continue:
+                continue
+            
+            if res.loop_should_break:
+                break
+
+            elements.append(value)
         return res.success(
             List(elements).with_meta(
                 context, pos_start=node.pos_start, pos_end=node.pos_end
@@ -229,9 +237,17 @@ class Interpreter:
             if not condition.is_true():
                 break
 
-            elements.append(res.register(self.visit(node.body_node, context)))
-            if res.should_return():
+            value = res.register(self.visit(node.body_node, context))
+            if res.should_return() and res.loop_should_continue == False and res.loop_should_break == False:
                 return res
+            
+            if res.loop_should_continue:
+                continue
+
+            if res.loop_should_break:
+                break
+
+            elements.append(value)
         return res.success(
             List(elements).with_meta(
                 context, pos_start=node.pos_start, pos_end=node.pos_end
@@ -244,7 +260,7 @@ class Interpreter:
         func_name = node.var_name_tok.value if node.var_name_tok else None
         body_node = node.body_node
         arg_name = [arg_name.value for arg_name in node.arg_name_toks]
-        func_value = Function(func_name, body_node, arg_name).with_meta(
+        func_value = Function(func_name, body_node, arg_name, node.should_auto_return).with_meta(
             context, node.pos_start, node.pos_end
         )
 
@@ -304,14 +320,24 @@ class Interpreter:
 
         return res.success(result or Number.null)
 
-    def visit_ContinueNode(self, node, context):
-        pass
+    def visit_ReturnNode(self, node, context):
+        res = RTResult()
+
+        if node.node_to_return:
+            value = res.register(self.visit(node.node_to_return, context))
+            if res.should_return():
+                return res
+        else:
+            value = Number.null
+        return res.success_return(value)
 
     def visit_BreakNode(self, node, context):
-        pass
+        res = RTResult()
+        return res.success_break()
 
-    def visit_ReturnNode(self, node, context):
-        pass
+    def visit_ContinueNode(self, node, context):
+        res = RTResult()
+        return res.success_continue()
 
 
 class SymbolTable:
@@ -464,10 +490,11 @@ class BaseFunction(Value):
 
 
 class Function(BaseFunction):
-    def __init__(self, name, body_node, arg_names):
+    def __init__(self, name, body_node, arg_names, should_auto_return):
         super().__init__(name)
         self.body_node = body_node
         self.arg_names = arg_names
+        self.should_auto_return = should_auto_return
 
     def execute(self, args):
         res = RTResult()
@@ -479,12 +506,13 @@ class Function(BaseFunction):
             return res
 
         value = res.register(interpreter.visit(self.body_node, exec_ctx))
-        if res.should_return():
-            return
-        return res.success(value)
+        if res.should_return() and res.func_return_value == None:
+            return res
+        ret_value = (value if self.should_auto_return else None) or res.func_return_value or Number.null 
+        return res.success(ret_value)
 
     def copy(self):
-        copy = Function(self.name, self.body_node, self.arg_names)
+        copy = Function(self.name, self.body_node, self.arg_names, self.should_auto_return)
         copy.set_context(self.context)
         copy.set_position(self.pos_start, self.pos_end)
         print(copy)

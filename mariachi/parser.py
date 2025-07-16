@@ -150,6 +150,7 @@ class Parser:
                     "'regresa', 'rompe', 'sigue', 'sea', int, float, identificador, '+', '-', '(', '[', o 'jamas' esperado",
                 )
             )
+        return res.success(expr)
 
     def expr(self):
         """Creates our expression."""
@@ -733,7 +734,7 @@ class Parser:
         if res.error:
             return res
 
-        return res.success(FuncDefNode(var_name_tok, arg_name_toks, body))
+        return res.success(FuncDefNode(var_name_tok, arg_name_toks, body, False))
 
     def binary_operation(self, func_a, ops, func_b=None):
         """Refactored logic for handling operators."""

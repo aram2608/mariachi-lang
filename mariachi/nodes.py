@@ -122,10 +122,11 @@ class WhileNode:
 
 
 class FuncDefNode:
-    def __init__(self, var_name_tok, arg_name_toks, body_node):
+    def __init__(self, var_name_tok, arg_name_toks, body_node, should_auto_return):
         self.var_name_tok = var_name_tok
         self.arg_name_toks = arg_name_toks
         self.body_node = body_node
+        self.should_auto_return = should_auto_return
 
         if self.var_name_tok:
             self.pos_start = self.var_name_tok.pos_start
