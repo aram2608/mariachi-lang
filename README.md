@@ -17,7 +17,9 @@ every statement is return as a List type, this lead to some strange behavior at 
 
 1. Clone the repo
 2. Install requirements: `pip install pytest typer`
-3. Run the REPL: `python -m mariachi.repl repl`
+3. Run the REPL: `python -m mariachi --repl`
+or
+4. Run a file: `python -m mariachi --file /path/to/file.mar`
 
 Yep, the repl entry is in a file called repl, a bit redundant, I will fix that later.
 
