@@ -1,7 +1,8 @@
 import typer
+from typing_extensions import Annotated
 from pathlib import Path
 
-from .mariachi import run, run_file
+from .mariachi import run
 
 app = typer.Typer()
 
@@ -22,17 +23,46 @@ intro = f"{RED}Saludos desde el Mariachi REPL!{RESET}\n"
 intro += f"{GREEN}Type 'salir' to quit.{RESET}\n"
 
 
-@app.command("run")
+@app.command()
+def main(
+    repl: Annotated[bool, typer.Option(help="Run the Mariachi Repl.")] = False,
+    file: Annotated[
+        Path,
+        typer.Option(
+            exists=True,
+            readable=True,
+            writable=False,
+            dir_okay=False,
+            file_okay=True,
+            help="File with your Mariachi script",
+        ),
+    ] = None,
+):
+    if repl:
+        run_repl()
+    else:
+        if file:
+            run_script(file)
+        else:
+            print("File not provided or empty.")
+
+
 def run_script(
-    file: Path = typer.Argument(..., help="Path to your Mariachi script"),
+    file,
 ):
     """Run a Mariachi script from a file."""
-    run_file(file)
-
-@app.command("repl")
-def start_repl():
-    """Launch the interactive Mariachi REPL."""
-    repl()
+    try:
+        code = file.read_text()
+        result, error = run(file, code)
+        if error:
+            print(error.as_string())
+        elif result:
+            if len(result.elements) == 1:
+                print(repr(result.elements[0]))
+            else:
+                print(repr(result))
+    except Exception as e:
+        print(f"{e}")
 
 
 def debug_repl():
@@ -59,7 +89,8 @@ def debug_repl():
         except Exception as e:
             print(f"{e}")
 
-def repl():
+
+def run_repl():
     print(intro)
     while True:
         code = input(PROMPT)
