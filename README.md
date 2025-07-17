@@ -10,7 +10,8 @@ With that said, the OOP nature of the tutorial is a bit overcomplex for what I h
 
 If you are curious in playing around with the language you can go ahead and give it a try, I am open to suggestions through pull or issues requests.
 
-Current Status- everything should work, some strange behavior to note is all functions, statements, and loops return 0
+Current Status- everything should work sorta, the return values are weird since
+every statement is return as a List type, this lead to some strange behavior at times.
 
 ## Getting Started
 
