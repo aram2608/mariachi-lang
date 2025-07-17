@@ -1,7 +1,8 @@
 para i = 1 hasta 6 {
-    canta("i es " + i)
+    eco("i es ")
+    eco(i)
 }
 
 para i = 0 hasta 10 paso 2 {
-    canta(i)
+    eco(i)
 }

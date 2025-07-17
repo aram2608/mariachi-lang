@@ -1,0 +1,9 @@
+define circulo(radio) {
+    entrega 3.14 * radio * radio
+}
+
+sea r = 4
+
+sea h = circulo(r)
+
+eco(h)

@@ -1,6 +1,7 @@
 import typer
 from typing_extensions import Annotated
 from pathlib import Path
+from sys import exit
 
 from .mariachi import run
 
@@ -25,6 +26,7 @@ intro += f"{GREEN}Type 'salir' to quit.{RESET}\n"
 
 @app.command()
 def main(
+    debug: Annotated[bool, typer.Option(help="Run the Mariachi Repl in Debug Mode.")] = False,
     repl: Annotated[bool, typer.Option(help="Run the Mariachi Repl.")] = False,
     file: Annotated[
         Path,
@@ -40,11 +42,10 @@ def main(
 ):
     if repl:
         run_repl()
+    elif debug:
+        debug_repl()
     else:
-        if file:
-            run_script(file)
-        else:
-            print("File not provided or empty.")
+        run_script(file)
 
 
 def run_script(
@@ -58,9 +59,9 @@ def run_script(
             print(error.as_string())
         elif result:
             if len(result.elements) == 1:
-                print(repr(result.elements[0]))
+                print(str(result.elements[0]))
             else:
-                print(repr(result))
+                print(str(result))
     except Exception as e:
         print(f"{e}")
 

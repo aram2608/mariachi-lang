@@ -1,2 +1,2 @@
 sea x = 1
-eco(1)
+eco(x)

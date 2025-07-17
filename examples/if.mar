@@ -1,3 +1,5 @@
+# Ignora esto
+sea x = 1
 si x > 10 {
     canta("Grande")
 } quizas x > 5 {
@@ -8,12 +10,8 @@ si x > 10 {
 
 si 1 == 1 { canta(1) }
 
-si 1 > 10 { canta("grande") } sino { canta("chico") }
-
-para i = 0 hasta 10 { 
-    si i == 4 { 
-    sigue } 
-    quizas i == 8 { 
-    rompe } 
-    sino {
-    sea x = x + i } } 
+si 1 > 10 { 
+    canta("grande") 
+    } sino {
+    canta("chico")
+    }

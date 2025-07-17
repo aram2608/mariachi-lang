@@ -1,9 +1,4 @@
 sea nombre = "Luna"
-fija PI = 3.1416
-
-define circulo(radio) {
-    entrega PI * radio * radio
-}
 
 mientras cierto {
     si nombre == "Luna" {
