@@ -119,3 +119,9 @@ def test_if_else(fresh_table):
 
 def test_if(fresh_table):
     assert run_mariachi("si 1 == 1 { eco(1) }", fresh_table) == String('1')
+
+def test_while(fresh_table):
+    run_mariachi("sea i = 0", fresh_table)
+    result = run_mariachi("mientras i < 5 { eco(i); sea i = i + 1; }", fresh_table)
+    result = result.elements[-1]
+    assert result == Number(5)

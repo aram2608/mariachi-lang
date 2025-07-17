@@ -4,6 +4,7 @@ from pathlib import Path
 from sys import exit
 
 from .mariachi import run
+from .interpreter import List, Function, String
 
 app = typer.Typer()
 
@@ -55,11 +56,20 @@ def run_script(
     try:
         code = file.read_text()
         result, error = run(file, code)
+
         if error:
             print(error.as_string())
         elif result:
-            if len(result.elements) == 1:
-                print(str(result.elements[0]))
+            if isinstance(result, List):
+                if isinstance(result.elements[0], Function):
+                    print(str(result.elements[1]))
+                elif isinstance(result.elements, List):
+                    result = result.elements[-1]
+                    print(str(result))
+                elif isinstance(result.elements, list):
+                    print(result.elements[-1])
+                else:
+                    print(str(result))
             else:
                 print(str(result))
     except Exception as e:
