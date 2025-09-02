@@ -1,1 +1,0 @@
-Fix the strange behavior for return values, probably need to refactor how everything is returned as list
