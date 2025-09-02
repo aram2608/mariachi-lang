@@ -27,7 +27,9 @@ intro += f"{GREEN}Type 'salir' to quit.{RESET}\n"
 
 @app.command()
 def main(
-    debug: Annotated[bool, typer.Option(help="Run the Mariachi Repl in Debug Mode.")] = False,
+    debug: Annotated[
+        bool, typer.Option(help="Run the Mariachi Repl in Debug Mode.")
+    ] = False,
     repl: Annotated[bool, typer.Option(help="Run the Mariachi Repl.")] = False,
     file: Annotated[
         Path,
