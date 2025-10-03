@@ -11,9 +11,11 @@ authors = [
 ]
 requires-python = ">=3.8"
 dependencies = [
-  "typer",
   "pytest",
 ]
 
 [tool.setuptools]
-include-package-data = true
+packages = ["mariachi"]
+
+[project.scripts]
+mariachi = "mariachi.__main__:main"

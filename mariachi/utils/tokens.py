@@ -90,3 +90,15 @@ class Token:
         if self.value != None:
             return f"Token: {self.tok_t}, {self.lexeme}, {self.value}"
         return f"Token: {self.tok_t}, {self.lexeme}"
+
+    def __eq__(self, other):
+        """The == overload to make testing of token types possible."""
+        # If the other object is a token we test all the member variables
+        if isinstance(other, Token):
+            return (
+                self.tok_t == other.lexeme
+                and self.lexeme == other.lexeme
+                and self.value == other.value
+            )
+        # Otherwise we return false
+        return False

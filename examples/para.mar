@@ -1,8 +1,0 @@
-para i = 1 hasta 6 {
-    eco("i es ")
-    eco(i)
-}
-
-para i = 0 hasta 10 paso 2 {
-    eco(i)
-}

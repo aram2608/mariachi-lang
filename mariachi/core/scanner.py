@@ -2,7 +2,7 @@ from __future__ import annotations
 from string import ascii_letters
 from typing import List, Dict, Callable
 
-from utils.tokens import Token, TokenType
+from ..utils.tokens import Token, TokenType
 
 
 class ScanningError(Exception):
@@ -61,12 +61,12 @@ class Scanner:
             "define": TokenType.DEFINE,  # define functions
             "entrega": TokenType.ENTREGA,  # return
             "objeto": TokenType.OBJETO,  # class
-            "cierto": TokenType.CIERTO, # true
-            "falso": TokenType.FALSO, # false
-            "este": TokenType.ESTE, # this
-            "canta": TokenType.CANTA, # print
-            "nada": TokenType.NADA, # nil
-            "super": TokenType.SUPER
+            "cierto": TokenType.CIERTO,  # true
+            "falso": TokenType.FALSO,  # false
+            "este": TokenType.ESTE,  # this
+            "canta": TokenType.CANTA,  # print
+            "nada": TokenType.NADA,  # nil
+            "super": TokenType.SUPER,
         }
 
     def scan_tokens(self) -> List[Token]:
@@ -75,7 +75,10 @@ class Scanner:
         while not self.is_end():
             # We set our start position and scan for tokens
             self.start = self.current
-            self.scan()
+            try:
+                self.scan()
+            except ScanningError as e:
+                print(e)
 
         # At the end of scanning we add an EOF token
         self.tokens.append(Token(TokenType.EOF, "", None, self.line))
@@ -159,7 +162,7 @@ class Scanner:
             # We handle identifiers/numbers/keywords in our default case
             case _:
                 # We first check for numbers
-                if self.is_digit(char):
+                if self.is_number(char):
                     self.make_number()
                 # We can then check for identifiers/keywords
                 elif self.is_alpha(char):
@@ -273,6 +276,8 @@ class Scanner:
     def peek(self) -> str:
         """Helper method to peek at current token."""
         # We simply index the source at our current position
+        if self.is_end():
+            return None
         return self.source[self.current]
 
     def peek_next(self) -> str:
@@ -310,6 +315,6 @@ class Scanner:
             return False
         return char in self.numbers
 
-    def is_alpha_numeric(self, char: str) -> bool:
+    def is_alpha_num(self, char: str) -> bool:
         """Helper to test if a character is alphanumeric."""
         return self.is_alpha(char) or self.is_number(char)
